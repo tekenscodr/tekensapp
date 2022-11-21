@@ -1,0 +1,11 @@
+FROM node:14
+
+WORKDIR /tekens_app/auth-api
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+CMD ["node", "app.js"]
