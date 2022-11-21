@@ -31,7 +31,10 @@ app.use('/uplaods', express.static('uploads'))
 app.use(cors())
 
 //Routes from server
-app.get('/', getEvents)
+app.get('/', (req, res)=>{
+    res.send("You are in the server");
+})
+app.get('/events', getEvents)
 app.use('/auth', AuthRoute)
 app.use('/events', Events)
 app.use('/ticket', verifyAccessToken, Qrcode)
