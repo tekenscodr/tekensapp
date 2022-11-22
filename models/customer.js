@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-//const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 
 
 const customerSchema = new Schema({
@@ -31,22 +31,22 @@ const customerSchema = new Schema({
 
 customerSchema.pre('save', async function(req, res, next) {
     try {
-        //const salt = await bcrypt.genSalt(10)
-        //const hashedPassword = await bcrypt.hash(this.password, salt)
-        //this.password = hashedPassword
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(this.password, salt)
+        this.password = hashedPassword
         next()
     } catch (error) {
         next(error)
     }
 })
 
-//customerSchema.methods.isValidPassword = async function(password) {
+customerSchema.methods.isValidPassword = async function(password) {
     try {
-      //  return await bcrypt.compare(password, this.password)
+        return await bcrypt.compare(password, this.password)
     } catch (error) {
         throw error
     }
-//}
+}
 
 const Customer = mongoose.model('customer', customerSchema)
 module.exports = Customer
