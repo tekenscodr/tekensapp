@@ -34,10 +34,10 @@ app.use(cors())
 app.get('/', (req, res)=>{
     res.send("You are in the server");
 })
-// app.get('/events', getEvents)
-// app.use('/auth', AuthRoute)
-// app.use('/events', Events)
-// app.use('/ticket', verifyAccessToken, Qrcode)
+app.get('/events', getEvents)
+app.use('/auth', AuthRoute)
+app.use('/events', Events)
+app.use('/ticket', verifyAccessToken, Qrcode)
 
 
 app.use(async(req, res, next) => {
