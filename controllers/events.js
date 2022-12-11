@@ -23,7 +23,6 @@ const getEvents = async(req, res, next) => {
     try {
     const events = await Event.find()
         res.status(200).json(events)
-        console.log(events)
     } catch (err) {
         res.send('Error: ' + err.message)
     }
