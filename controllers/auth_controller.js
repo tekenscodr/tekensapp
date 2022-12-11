@@ -25,7 +25,7 @@ module.exports = {
             const accessToken = await signAccessToken(savedUser.id)
             //const refreshToken = await verifyAccessToken(savedUser.id)
 
-            res.send({ accessToken })
+            res.status(200).send({ accessToken })
         } catch (error) {
             if (error === true) error.status = 422
             next(error)
@@ -48,7 +48,7 @@ module.exports = {
             const accessToken = await signAccessToken(customer.id)
                 // const refreshToken = await signRefreshToken(customer.id)
 
-            res.send({ accessToken });
+                res.status(200).send({ accessToken });
             // res.cookie("token", accessToken, {
             //     httpOnly: true,
             //     secure: true,

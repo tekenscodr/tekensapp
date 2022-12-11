@@ -12,17 +12,39 @@ const createEvent = async(req, res, next) => {
           savedEvents.banner = req.file.path   
         }
         savedEvents.save().then(item => {
-            res.send('item saved');
+            res.send('Events saved');
         })
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
 }
 
-const getEvents = async(req, res) => {
+const getEvents = async(req, res, next) => {
     try {
-        const events = await Event.find()
-        res.json(events)
+    const events = await Event.find()
+        res.status(200).json(events)
+        
+    } catch (err) {
+        res.send('Error: ' + err.message)
+    }
+}
+
+
+const nearMe = async(req, res, next) => {
+    try {
+     const events = await Event.find({
+        $geoNear: {
+            near: {type: "Point", 
+                    coordinates: [
+                        parseFloat(req.query.lng), 
+                        parseFloat(req.query.lat)]},
+            maxDistance: 100000,
+             spherical: true 
+            
+    }
+    })
+    res.status(200).json(events)
+        
     } catch (err) {
         res.send('Error: ' + err.message)
     }
@@ -38,4 +60,16 @@ const getID = async(req, res, next) => {
         next(err)
     }
 }
-module.exports = { createEvent, getEvents, getID }
+module.exports = { 
+                    createEvent, 
+                    getEvents, 
+                    getID,
+                    nearMe,}
+
+      // const events = await Event.find()
+        // res.json(events)
+        // Event.geoNear({type: "Point", coordinates: [parseFloat(req.params.lng), parseFloat(req.params.lat)]},
+        // {maxDistance: 100000, spherical: true}
+        // ).then((events)=>{
+        //     res.send(events)
+        // })

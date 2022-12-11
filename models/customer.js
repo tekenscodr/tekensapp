@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const bcrypt = require('bcryptjs')
+const ticket =require('./qrcode-model')
 
 
 const customerSchema = new Schema({
@@ -25,9 +26,16 @@ const customerSchema = new Schema({
     surname: {
         type: String,
         required: true,
-    }
+    },
+    // ticket:[{ticketSchema}]
 })
 
+
+customerSchema.methods.toJSON = function(){
+    const user = this.toObject()
+    delete user.password
+    return user;
+}
 
 customerSchema.pre('save', async function(req, res, next) {
     try {

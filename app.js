@@ -17,11 +17,11 @@ const cors = require('cors');
 const app = express()
 
 //middleware
-// app.use(morgan('dev'))
+app.use(morgan('dev'))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use('/uplaods', express.static('uploads'))
+app.use('/uploads/', express.static('uploads'))
 
 // const corsOption = {
 //     origin: ['http://localhost:3000'],
@@ -34,10 +34,9 @@ app.use(cors())
 app.get('/', (req, res)=>{
     res.send("You are in the server");
 })
-app.get('/events', getEvents)
 app.use('/auth', AuthRoute)
 app.use('/events', Events)
-app.use('/ticket', verifyAccessToken, Qrcode)
+app.use('/ticket', Qrcode)
 
 
 app.use(async(req, res, next) => {

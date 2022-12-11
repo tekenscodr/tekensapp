@@ -3,10 +3,11 @@ const Schema = mongoose.Schema;
 
 
 const ticketSchema = new Schema({
-    username: {type: String, required: true},
+    //username: {type: String, required: true},
     eventId: { type: String, required: true },
     userId: { type: String, required: true },
-    islinked: { type: Boolean, default: false },
+    isScanned: { type: Boolean, default: false },
+    timeScanned: { type: String,},
 }, { timestamp: true })
 
 const Ticket = mongoose.model('Ticket', ticketSchema)
