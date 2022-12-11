@@ -5,7 +5,7 @@ const upload = require('../helpers/img_upload')
 
 router.post('/create', upload.single('banner'), Event.createEvent)
 router.get('/', Event.getEvents)
-router.get('/', Event.nearMe)
+router.get('/nearme', Event.nearMe)
 
 // router.get('/get', Event.getEvents)
 

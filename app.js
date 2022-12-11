@@ -38,7 +38,6 @@ app.use('/auth', AuthRoute)
 app.use('/events', Events)
 app.use('/ticket', Qrcode)
 
-
 app.use(async(req, res, next) => {
     next(createError.NotFound())
 })
