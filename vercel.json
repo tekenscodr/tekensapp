@@ -9,6 +9,10 @@
         {
             "src":"/(.*)",
             "dest": "/app.js"
+        },
+        {
+            "src":"/events(.*)",
+            "dest": "/app.js"
         }
     ],
     "headers": [
