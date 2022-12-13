@@ -16,8 +16,7 @@ module.exports = {
 
             const doesExist = await Customer.findOne({ email: result.email })
             if (doesExist)
-                throw createError.Conflict(`${result.email} is already registered`)
-            
+                return res.status(409).json({message: "already registered"})
             //TODO: add if empty to api 
             
             const customer = new Customer(result)
