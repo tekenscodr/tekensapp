@@ -21,10 +21,10 @@ module.exports = {
             
             const customer = new Customer(result)
             const savedUser = await customer.save()
-            //const accessToken = await signAccessToken(savedUser.id)
+            const accessToken = await signAccessToken(savedUser.id)
             //const refreshToken = await verifyAccessToken(savedUser.id)
 
-            res.status(200).json(savedUser); 
+            res.status(200).json({accessToken, ...savedUser._doc}); 
         } catch (error) {
             if (error === true) error.status = 422;
             res.status(422).json({error: error.message})
