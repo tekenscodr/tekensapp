@@ -24,7 +24,7 @@ module.exports = {
             //const token = await signAccessToken(savedUser.id)
             //const refreshToken = await verifyAccessToken(savedUser.id)
 
-            res.status(200).json({savedUser}); 
+            res.status(200).json(savedUser); 
         } catch (error) {
             if (error === true) error.status = 422;
             res.status(422).json({error: error.message})
