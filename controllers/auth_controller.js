@@ -21,10 +21,10 @@ module.exports = {
             
             const customer = new Customer(result)
             const savedUser = await customer.save()
-            const accessToken = await signAccessToken(savedUser.id)
+            const token = await signAccessToken(savedUser.id)
             //const refreshToken = await verifyAccessToken(savedUser.id)
 
-            res.status(200).json({accessToken, ...savedUser._doc}); 
+            res.status(200).json({token, ...savedUser._doc}); 
         } catch (error) {
             if (error === true) error.status = 422;
             res.status(422).json({error: error.message})
@@ -45,10 +45,10 @@ module.exports = {
             if (!isMatch)
                 throw createError.Unauthorized("username/password not valid")
 
-            const accessToken = await signAccessToken(customer.id)
+            const token = await signAccessToken(customer.id)
                 // const refreshToken = await signRefreshToken(customer.id)
 
-                res.status(200).json({ accessToken, ...customer._doc });
+                res.status(200).json({ token, ...customer._doc });
             // res.cookie("token", accessToken, {
             //     httpOnly: true,
             //     secure: true,
