@@ -48,7 +48,7 @@ module.exports = {
             const accessToken = await signAccessToken(customer.id)
                 // const refreshToken = await signRefreshToken(customer.id)
 
-                res.status(200).send({ accessToken });
+                res.status(200).json({ accessToken, ...customer._doc });
             // res.cookie("token", accessToken, {
             //     httpOnly: true,
             //     secure: true,
