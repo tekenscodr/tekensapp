@@ -1,6 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const createError = require('http-errors')
+const Customer = require('./models/customer')
 require('dotenv').config()
 require('./helpers/init_mongo')
 const { verifyAccessToken } = require('./helpers/jwt_helper')
@@ -33,6 +34,17 @@ app.use(cors())
 //Routes from server
 app.get('/', (req, res)=>{
     res.send("You are in the server");
+})
+app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
+          try {
+            let id = await req.payload;
+            let user = await Customer.findOne({_id:id}).exec()
+            console.log(user)  
+            return res.json({...user._doc});
+        }catch(err) {
+            next(err)
+        }
+
 })
 app.use('/auth', AuthRoute)
 app.use('/events', Events)

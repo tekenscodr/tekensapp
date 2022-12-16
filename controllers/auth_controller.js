@@ -60,6 +60,15 @@ module.exports = {
         }
     },
 
+    // getUser: async(req, res, next) => {
+    //     try {
+    //         let id = await "akbckabs";  
+    //         res.json(id);
+    //     }catch(err) {
+    //         next(err)
+    //     }
+    // },
+
     // refreshToken: async(req, res, next) => {
     //     try {
     //         const { refreshToken } = req.body
