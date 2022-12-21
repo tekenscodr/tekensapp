@@ -21,7 +21,7 @@ const saveTicket = async(req, res, next) =>{
         //     let userId = await user.json(user)
 
         const userId = await req.payload  
-        const eventId = await fetch('http://localhost:3000/events/6377ddca5d5c14619414ae50')
+        const eventId = await fetch('http://localhost:3000/events/:id')
             .then(res => res.json())
 
         // Save Ticket into database
@@ -61,7 +61,7 @@ const unscannedTicket = async(req, res, next) =>{
                 events
              };
             }));
-            res.send({
+            res.json({
                 success: true,
                 code:200,
                 message:"Ticket found",
@@ -90,7 +90,11 @@ const scannedTicket = async(req, res, next) =>{
                 events
              };
             }))
-            res.status(200).json(scanned)
+            res.status(200).res.json({
+                success: true,
+                code:200,
+                message:"Ticket found",
+                response: pending});
 
 
     } catch (error) {
@@ -100,10 +104,10 @@ const scannedTicket = async(req, res, next) =>{
 const scannerTicket = async(req, res, next) =>{
     try {
         const eventId = await fetch
-        ('http://localhost:3000/events/63873594ee2567285d96abde').then(res => res.json())
+        ('http://localhost:3000/events/:id').then(res => res.json())
         
         const ticket = await Ticket.find({eventId:eventId}).where({"isScanned": true})
-          res.status(200).json(ticket)
+          res.status(200).json({ticket})
     } catch (error) {
         next(error)
     }

@@ -1,19 +1,58 @@
 const Event = require('../models/event-model')
 const createError = require('http-errors')
+require('dotenv')
+const {S3Client} = require('@aws-sdk/client-s3');
+const {PutObjectCommand} = require('@aws-sdk/client-s3');
+const crypto = require('crypto')
 
+
+const bucketName = process.env.AWS_BUCKET_NAME
+const region= process.env.AWS_BUCKET_REGION
+const accessKey = process.env.AWS_ACCESS_KEY
+const secretAccessKey = process.env.AWS_SECRET_KEY
+
+
+
+const s3 = new S3Client({
+    credentials: {
+        accessKeyId: accessKey,
+        secretAccessKey: secretAccessKey,
+    },
+    region: region
+});
+
+const randomImageName = (bytes = 32) => crypto.randomImageName(bytes).toString('hex')
 
 const createEvent = async(req, res, next) => {
     try {
+        // const command = new PutObjectCommand (params)
+        // await s3.send(command)
+
         const doesExist = await Event.findOne({ title: req.body.title });
         if (doesExist)
             throw createError.Conflict(`${req.body.title} already exists`)
-        const savedEvents = await Event(req.body)
-        if(req.file){
-          savedEvents.banner = req.file.path   
+        const params ={
+            Bucket: bucketName,
+            Key: randomImageName(),
+            Body: req.file.buffer,
+            ContentType: req.file.mimetype,
         }
+        const command = new PutObjectCommand(params)
+        await s3.send(command)       
+        
+        const savedEvents = await Event(req.body)
+        savedEvents.banner = randomImageName()    
+
+        console.log(req.file)
+
+        
+      
+
         savedEvents.save().then(item => {
             res.send('Events saved');
         })
+
+       
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
