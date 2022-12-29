@@ -93,11 +93,11 @@ const scannedTicket = async(req, res, next) =>{
                 events
              };
             }))
-            res.status(200).res.json({
+            res.status(200).json({
                 success: true,
                 code:200,
                 message:"Ticket found",
-                response: pending});
+                response: scanned});
 
 
     } catch (error) {
