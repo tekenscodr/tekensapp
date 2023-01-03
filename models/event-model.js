@@ -30,7 +30,6 @@ const eventSchema = new Schema({
     date: { type: Date, required: true },
     time: { type: String, required: true },
     price: { type: String },
-    isSaved: {type: Boolean, default: false},
     location: GeoSchema,
 }, 
 { timestamps: true }, 

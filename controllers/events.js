@@ -1,10 +1,12 @@
 const Event = require('../models/event-model')
+const User = require('../models/customer');
 const createError = require('http-errors')
 require('dotenv')
 const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
-const client = new S3Client(clientParams);
+const fetch = (...args) =>
+    import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 
 
@@ -23,7 +25,7 @@ const s3 = new S3Client({
     region: region
 });
 
-const randomImageName = (bytes = 32) => crypto.randomImageName(bytes).toString('hex')
+const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
 const createEvent = async(req, res, next) => {
     try {
@@ -45,7 +47,7 @@ const createEvent = async(req, res, next) => {
         
         
         const savedEvents = await Event(req.body)
-        savedEvents.banner = randomImageName()    
+        savedEvents.banner = imageName    
 
         console.log(req.file)
 
@@ -67,23 +69,46 @@ try {
     const events = await Event.find()
     
     for(const event of events) {
-    const getObjectParams = {
-        Bucket: bucketName,
-        Key: event.imageName,
+    event.imageUrl = 'https://d1v5yq7t85t3r8.cloudfront.net'+ event.imageName;
     }
-    const command = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, command);
-    event.imageUrl = url;
-    }
-    res.status(200).json(events)
-    
-
+    res.status(200).json(events);
     } catch (err) {
-        res.send('Error: ' + err.message)
+        res.json('Error: '+ err.message);
     }
 }
 
 
+// POST REQUEST ****** SAVED EVENTS
+const eventSave = async(req, res, next) => {
+    try {
+        let userId = await req.payload;
+        let eventId = await fetch('http://localhost:3000/events/:id')
+        .then(res => res.json())
+        const saved = new Saved({
+            userId: userId,
+            eventId: eventId
+        });
+        saved.save()
+        res.status(200).json(saved);   
+    } catch (err){
+        res.status(500).json('Error: '+ err.message)
+        next(err)
+    }
+}
+
+// GET REQUEST ********GET ALL SAVED
+const savedEvents = async(req, res, next) => {
+    try {
+        let userId = await req.payload;
+        const events = await Saved.findMany({userId:userId})
+        res.status(200).json(events);
+    } catch (err) {
+    res.status(500).json(err)
+    }
+}
+
+
+//GET REQUEST ******* GET ALL EVENTS NEAR BY
 const nearMe = async(req, res, next) => {
     try {
      const events = await Event.find({
@@ -116,7 +141,9 @@ const getID = async(req, res, next) => {
 }
 module.exports = { 
                     createEvent, 
-                    getEvents, 
+                    getEvents,
+                    eventSave,
+                    savedEvents, 
                     getID,
                     nearMe,}
 
