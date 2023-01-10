@@ -54,7 +54,7 @@ const unscannedTicket = async(req, res, next) =>{
         
         
         pending = await Promise.all(tickets.map(async (ticket, i) => {
-            let events = await Event.find({
+            let events = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
             ticket.event_details = events
@@ -77,7 +77,7 @@ const scannedTicket = async(req, res, next) =>{
         const tickets = await Ticket.find({userId:userId})
         .where({"isScanned": true})
         const scanned = await Promise.all(tickets.map(async ticket => {
-            const events = await Event.find({
+            const events = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
              ticket.event_details = events
