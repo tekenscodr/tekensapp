@@ -6,11 +6,29 @@ const User = require('../models/customer');
 const { find } = require('../models/qrcode-model');
 const { default: mongoose } = require('mongoose');
 const { populate } = require('../models/event-model');
+const crypto = require('crypto')
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
+
 const fetch = (...args) =>
     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 
-
+    const bucketName = process.env.CODE_BUCKET_NAME
+    const region= process.env.CODE_BUCKET_REGION
+    const accessKey = process.env.CODE_ACCESS_KEY
+    const secretAccessKey = process.env.CODE_SECRET_KEY
+    
+    const s3 = new S3Client({
+        credentials: {
+            accessKeyId: accessKey,
+            secretAccessKey: secretAccessKey,
+        },
+        region: region
+    });
+    
+    const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+    
 
 
 const saveTicket = async(req, res, next) =>{
@@ -29,11 +47,22 @@ const saveTicket = async(req, res, next) =>{
             userId: userId,
             eventId: eventId
         });
+        const code = await QRCode
+            .toFile(`./codegenerated/${randomImageName}.png`, `${userId} + ${eventId}`) 
+        const imageName = randomImageName();
+            const params ={
+            Bucket: bucketName,
+            Key: imageName,
+            Body: code,
+            ContentType: req.file.mimetype,
+        }
+        const command = new PutObjectCommand(params)
+        await s3.send(command)
+
+        ticket.eventName = imageName
+
         ticket.save()
         res.status(200).json(ticket)
-        const code = await QRCode
-            .toFile(`./codegenerated/${ticket.id}.png`, `${userId} + ${eventId}`)
-            return code;
         // const code = await QRCode
         // .toFile("./codegenerated/npp.png", 'https://newpatrioticparty.org/press-conference-by-the-new-patriotic-party-addressed-by-the-general-secretary/')
         // return res.status(200).json(code) 
