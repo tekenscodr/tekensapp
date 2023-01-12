@@ -47,9 +47,9 @@ const saveTicket = async(req, res, next) =>{
             userId: userId,
             eventId: eventId
         });
+        const imageName = randomImageName();
         const code = await QRCode
             .toFile(`./codegenerated/${imageName()}.png`, `${userId} + ${eventId}`) 
-        const imageName = randomImageName();
             const params ={
             Bucket: bucketName,
             Key: imageName,
