@@ -21,7 +21,7 @@ const saveTicket = async(req, res, next) =>{
         //     let userId = await user.json(user)
 
         const userId = await req.payload  
-        const eventId = await fetch('http://localhost:3000/events/63b4376894c8dd78b0d376e2')
+        const eventId = await fetch('http://localhost:3000/events/:id')
             .then(res => res.json())
 
         // Save Ticket into database
@@ -30,7 +30,7 @@ const saveTicket = async(req, res, next) =>{
             eventId: eventId
         });
         ticket.save()
-        res.send(ticket.id)
+        res.json(ticket)
         const code = await QRCode
             .toFile(`./codegenerated/${ticket.id}.png`, `${userId} + ${eventId}`)
             return res.status(200).json(code) 
