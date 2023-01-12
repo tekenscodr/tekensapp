@@ -30,10 +30,10 @@ const saveTicket = async(req, res, next) =>{
             eventId: eventId
         });
         ticket.save()
-        return res.status(200).json(ticket)
+        res.status(200).json(ticket)
         const code = await QRCode
             .toFile(`./codegenerated/${ticket.id}.png`, `${userId} + ${eventId}`)
-            return res.status(200).json(code) 
+            return code;
         // const code = await QRCode
         // .toFile("./codegenerated/npp.png", 'https://newpatrioticparty.org/press-conference-by-the-new-patriotic-party-addressed-by-the-general-secretary/')
         // return res.status(200).json(code) 
