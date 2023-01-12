@@ -30,7 +30,7 @@ const saveTicket = async(req, res, next) =>{
             eventId: eventId
         });
         ticket.save()
-        res.json(ticket)
+        return res.status(200).json(ticket)
         const code = await QRCode
             .toFile(`./codegenerated/${ticket.id}.png`, `${userId} + ${eventId}`)
             return res.status(200).json(code) 
