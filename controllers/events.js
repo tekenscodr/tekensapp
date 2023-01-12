@@ -134,11 +134,12 @@ const nearMe = async(req, res, next) => {
 const getID = async(req, res, next) => {
     let event
     try {
-         event = await Event.findById(req.params.id)
-        res.json(id._id);
+         event = await Event.findById(req.params.id)        
         if (id == null) {
-            return res.status(400).json({message: 'Cannot find event'})
+         return res.status(400).json({message: 'Cannot find event'})
         }
+         return res.status(200).json(id._id);
+
     } catch (err) {
         return res.status(500).json('Error: ' + err.message)
     }
