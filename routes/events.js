@@ -10,7 +10,7 @@ router.get('/saved', Event.eventSave)
 
 // router.get('/get', Event.getEvents)
 
-router.get('/:id', Event.getID)
+router.param('/:id', Event.getID)
 
 
 module.exports = router

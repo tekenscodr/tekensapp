@@ -21,7 +21,7 @@ const saveTicket = async(req, res, next) =>{
         //     let userId = await user.json(user)
 
         const userId = await req.payload  
-        const eventId = await fetch('https://tekensapp.vercel.app/events/:id')
+        const eventId = await fetch('http://localhost:3000/events/:id')
             .then(res => res.json())
 
         // Save Ticket into database

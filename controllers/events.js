@@ -5,6 +5,7 @@ require('dotenv')
 const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { eventNames } = require('../models/event-model');
 const fetch = (...args) =>
     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -131,13 +132,18 @@ const nearMe = async(req, res, next) => {
 
 
 const getID = async(req, res, next) => {
+    let event
     try {
-        const id = await Event.findById(req.params.id)
+         event = await Event.findById(req.params.id)
         res.json(id._id);
+        if (id == null) {
+            return res.status(400).json({message: 'Cannot find event'})
+        }
     } catch (err) {
-        res.send('Error: ' + err.message)
-        next(err)
+        return res.status(500).json('Error: ' + err.message)
     }
+    res.event = event
+    next()
 }
 module.exports = { 
                     createEvent, 
