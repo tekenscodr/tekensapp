@@ -49,14 +49,16 @@ const saveTicket = async(req, res, next) =>{
             eventId: eventId
         });
         const imageName = randomImageName();
-        const code = await QRCode
-            .toFile(`./codegenerated/${imageName}.png`, `${userId} + ${eventId}`) 
+        const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
+            if(err) throw err;
+            return data
+        }) 
             const params ={
             Bucket: bucketName,
             Key: imageName,
             Body: code,
-            ContentType: req.file.mimetype,
         }
+        console.log (params)
         const command = new PutObjectCommand(params)
         await s3.send(command)
 
