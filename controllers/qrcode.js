@@ -70,7 +70,7 @@ const saveTicket = async(req, res, next) =>{
         // .toFile("./codegenerated/npp.png", 'https://newpatrioticparty.org/press-conference-by-the-new-patriotic-party-addressed-by-the-general-secretary/')
         // return res.status(200).json(code) 
     } catch (err) {
-        res.send(err.message)
+        res.json(err.message)
         next(err)
     }
 }
