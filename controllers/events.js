@@ -135,10 +135,10 @@ const getID = async(req, res, next) => {
     let event
     try {
          event = await Event.findById(req.params.id)        
-        if (id == null) {
+        if (event == null) {
          return res.status(400).json({message: 'Cannot find event'})
         }
-         return res.status(200).json(id._id);
+         return res.status(200).json(event._id);
 
     } catch (err) {
         return res.status(500).json('Error: ' + err.message)
