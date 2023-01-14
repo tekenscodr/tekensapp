@@ -14,10 +14,10 @@ const fetch = (...args) =>
     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 
-    const bucketName = process.env.AWS_BUCKET_NAME
-    const region= process.env.AWS_BUCKET_REGION
-    const accessKey = process.env.AWS_ACCESS_KEY
-    const secretAccessKey = process.env.AWS_SECRET_KEY
+    const bucketName = process.env.CODE_BUCKET_NAME
+    const region= process.env.CODE_BUCKET_REGION
+    const accessKey = process.env.CODE_ACCESS_KEY
+    const secretAccessKey = process.env.CODE_SECRET_KEY
     
     
     const s3 = new S3Client({
