@@ -42,7 +42,7 @@ const createEvent = async(req, res, next) => {
             Key: imageName,
             Body: req.file.buffer,
             ContentType: req.file.mimetype,
-        }
+            }
         const command = new PutObjectCommand(params)
         await s3.send(command)
         

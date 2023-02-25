@@ -9,17 +9,17 @@ const { populate } = require('../models/event-model');
 const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
-
+const {init, verify} = require('../helpers/payment')
 const fetch = (...args) =>
-    import ('node-fetch').then(({ default: fetch }) => fetch(...args));
-
+  import('node-fetch').then(({ default: fetch }) => fetch(...args));
+// const fetch = (...args) =>
+//     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
+// const fetch = require('node-fetch')
 
     const bucketName = process.env.CODE_BUCKET_NAME
     const region= process.env.CODE_BUCKET_REGION
     const accessKey = process.env.CODE_ACCESS_KEY
     const secretAccessKey = process.env.CODE_SECRET_KEY
-    
-    
     const s3 = new S3Client({
         credentials: {
             accessKeyId: accessKey,
@@ -85,7 +85,7 @@ const unscannedTicket = async(req, res, next) =>{
         if(tickets == 0) throw("There are no tickets");
         
         
-        pending = await Promise.all(tickets.map(async (ticket, i) => {
+        pending = await Promise.all(tickets.map(async (ticket) => {
             let event = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
@@ -152,13 +152,24 @@ const eachTicket = async(req, res, next)=> {
         next(error)
     }
 }
-
+const buyTicket = async(req, res, next) => {
+    try {
+         res.send("jack where are you")
+    } catch (err) {
+        res.status(500).json(err)
+    }
+}
+const purchase = async(req, res) => {
+    res.send("God is good!!")
+}
 module.exports = { 
             saveTicket, 
             unscannedTicket, 
             scannedTicket, 
             scannerTicket,
             eachTicket,
+            buyTicket,
+            purchase
         }
 
 

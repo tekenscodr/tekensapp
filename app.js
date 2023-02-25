@@ -16,6 +16,7 @@ const cors = require('cors');
 
 
 const app = express()
+app.disable('etag')
 
 //middleware
 app.use(morgan('dev'))
@@ -64,7 +65,7 @@ app.use((err, req, res, next) => {
     })
 })
 
-const PORT =  3000
+const PORT =  6000
 
 app.listen(PORT, () => {
     console.log(`listening on port ${PORT}`)
