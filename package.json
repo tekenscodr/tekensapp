@@ -4,6 +4,7 @@
     "description": "",
     "main": "app.js",
     "engines": {
+        "node": "16x",
         "node": "18x"
     },
     "scripts": {
