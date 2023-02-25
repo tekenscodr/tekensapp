@@ -159,6 +159,7 @@ const buyTicket = async(req, res, next) => {
         res.status(500).json(err)
     }
 }
+/****Why are you not running */
 const purchase = async(req, res) => {
     res.send("God is good!!")
 }
