@@ -11,8 +11,8 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const {init, verify} = require('../helpers/payment')
 const axios = require = ('axios')
-// const fetch = (...args) =>
-//   import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fetch = (...args) =>
+  import('node-fetch').then(({ default: fetch }) => fetch(...args));
 // const fetch = (...args) =>
 //     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 // const fetch = require('node-fetch')
@@ -143,11 +143,9 @@ const scannerTicket = async(req, res, next) =>{
 
 const eachTicket = async(req, res, next)=> {
     try {
-
-
         const event = await req.params.id
         //  const ticket = fetch()
-        const ticket = await Ticket.findOne({_id : id})
+        const ticket = await Ticket.findOne({_id : event})
             res.status(200).json(ticket)
     } catch (error) {
         next(error)
