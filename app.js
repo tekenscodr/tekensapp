@@ -1,7 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const createError = require('http-errors')
-// const Customer = require('./models/customer')
+const Customer = require('./models/customer')
 require('dotenv').config()
 require('./helpers/init_mongo')
 // const { verifyAccessToken } = require('./helpers/jwt_helper')
