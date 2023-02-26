@@ -36,17 +36,18 @@ app.use(cors())
 app.get('/', (req, res)=>{
     res.send("You are in the server");
 })
-// app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
-//           try {
-//             let id = await req.payload;
-//             let user = await Customer.findOne({_id:id}).exec()
-//             console.log(user)  
-//             return res.json({...user._doc});
-//         }catch(err) {
-//             next(err)
-//         }
 
-// })
+app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
+          try {
+            let id = await req.payload;
+            let user = await Customer.findOne({_id:id}).exec()
+            console.log(user)  
+            return res.json({...user._doc});
+        }catch(err) {
+            next(err)
+        }
+
+})
 app.use('/auth', AuthRoute)
 app.use('/events', Events)
 app.use('/ticket', Qrcode)
@@ -55,15 +56,15 @@ app.use(async(req, res, next) => {
     next(createError.NotFound())
 })
 
-app.use((err, req, res, next) => {
-    res.status(err.status || 500)
-    res.send({
-        error: {
-            status: err.status || 500,
-            message: err.message,
-        },
-    })
-})
+// app.use((err, req, res, next) => {
+//     res.status(err.status || 500)
+//     res.send({
+//         error: {
+//             status: err.status || 500,
+//             message: err.message,
+//         },
+//     })
+// })
 
 const PORT =  6000
 
