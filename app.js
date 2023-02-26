@@ -13,11 +13,7 @@ const Qrcode = require('./routes/qrcode')
 const cookieParser = require('cookie-parser')
 const cors = require('cors');
 
-
-
 const app = express()
-app.disable('etag')
-
 //middleware
 app.use(morgan('dev'))
 app.use(cookieParser())
