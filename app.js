@@ -1,11 +1,11 @@
 const express = require('express')
-const morgan = require('morgan')
+// const morgan = require('morgan')
 // const createError = require('http-errors')
 // const Customer = require('./models/customer')
 // require('./helpers/init_mongo')
 // const { verifyAccessToken } = require('./helpers/jwt_helper')
 // const { getEvents } = require('./controllers/events')
-require('./helpers/init_redis')
+// require('./helpers/init_redis')
 // const AuthRoute = require('./routes/auth')
 // const Events = require('./routes/events')
 // const Qrcode = require('./routes/qrcode')
@@ -15,7 +15,7 @@ require('dotenv').config();
 
 const app = express()
 //middleware
-app.use(morgan('dev'))
+// app.use(morgan('dev'))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
