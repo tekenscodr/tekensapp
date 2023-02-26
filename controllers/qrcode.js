@@ -153,7 +153,7 @@ const buyTicket = async(req, res, next) => {
         let email = result.email
         console.log(email);
         const params = await JSON.stringify({
-            "email": result.email,
+            "email": email,
             "amount": req.params.price
           })
           
@@ -176,7 +176,10 @@ const buyTicket = async(req, res, next) => {
             });
           
             response.on('end', () => {
-              res.json(JSON.parse(data))
+              let result = JSON.parse(data);
+              if(result.status == true) res.redirect(result.data.authorization_url);
+              next();
+              console.log(result)
             })
           }).on('error', error => {
             console.error(error)
