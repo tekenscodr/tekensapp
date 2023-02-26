@@ -10,13 +10,11 @@ const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const {init, verify} = require('../helpers/payment')
-const axios = require = ('axios')
+const axios = require('axios')
+const https = require('https')
+
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
-// const fetch = (...args) =>
-//     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
-// const fetch = require('node-fetch')
-
     const bucketName = process.env.CODE_BUCKET_NAME
     const region= process.env.CODE_BUCKET_REGION
     const accessKey = process.env.CODE_ACCESS_KEY
@@ -30,9 +28,6 @@ const fetch = (...args) =>
     });
     
     const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
-    
-
-
 const saveTicket = async(req, res, next) =>{
     try {
         
@@ -153,7 +148,42 @@ const eachTicket = async(req, res, next)=> {
 }
 const buyTicket = async(req, res, next) => {
     try {
-         res.send("jack where are you")
+        let userId = await req.params.userId
+        const result = await User.findOne({_id: userId})
+        let email = result.email
+        console.log(email);
+        const params = await JSON.stringify({
+            "email": result.email,
+            "amount": req.params.price
+          })
+          
+          const options = {
+            hostname: 'api.paystack.co',
+            port: 443,
+            path: '/transaction/initialize',
+            method: 'POST',
+            headers: {
+              Authorization: 'Bearer sk_test_d4061fac60668a5522d7eddc0633749888de3b57',
+              'Content-Type': 'application/json'
+            }
+          }
+          
+          const request = https.request(options, response => {
+            let data = ''
+          
+            response.on('data', (chunk) => {
+              data += chunk
+            });
+          
+            response.on('end', () => {
+              res.json(JSON.parse(data))
+            })
+          }).on('error', error => {
+            console.error(error)
+          })
+          
+          request.write(params)
+          request.end()
     } catch (err) {
         res.status(500).json(err)
     }
