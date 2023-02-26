@@ -3,7 +3,7 @@ const morgan = require('morgan')
 const createError = require('http-errors')
 // const Customer = require('./models/customer')
 require('dotenv').config()
-require('./helpers/init_mongo')
+// require('./helpers/init_mongo')
 // const { verifyAccessToken } = require('./helpers/jwt_helper')
 // const { getEvents } = require('./controllers/events')
 require('./helpers/init_redis')
@@ -52,15 +52,15 @@ app.use(async(req, res, next) => {
     next(createError.NotFound())
 })
 
-// app.use((err, req, res, next) => {
-//     res.status(err.status || 500)
-//     res.send({
-//         error: {
-//             status: err.status || 500,
-//             message: err.message,
-//         },
-//     })
-// })
+app.use((err, req, res, next) => {
+    res.status(err.status || 500)
+    res.send({
+        error: {
+            status: err.status || 500,
+            message: err.message,
+        },
+    })
+})
 
 const PORT =  6000
 
