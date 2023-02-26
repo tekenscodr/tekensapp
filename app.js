@@ -9,9 +9,9 @@ const express = require('express')
 // const Events = require('./routes/events')
 // const Qrcode = require('./routes/qrcode')
 const cookieParser = require('cookie-parser')
+const mongoose = require('mongoose')
 const cors = require('cors');
 require('dotenv').config();
-require('./helpers/init_mongo');
 const app = express()
 //middleware
 // app.use(morgan('dev'))
@@ -60,6 +60,36 @@ app.get('/', (req, res)=>{
 //         },
 //     })
 // })
+
+//DATABASE CONNECTION
+mongoose.connect(process.env.MONGODB_URI, {
+    dbName: process.env.DB_NAME,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+
+})
+.then(() => {
+    console.log('mongodb tekens connected')
+})
+.catch((err) => console.log(err.message))
+
+mongoose.connection.on('connected', () => {
+    console.log('mongodb connection established')
+})
+
+mongoose.connection.on('error', (err) =>{
+    console.log(err.message)
+})
+
+mongoose.connection.on('disconnected', () => {
+    console.log('mongoose connection disconnected')
+})
+
+
+process.on('SIGINT', async () => {
+    await mongoose.connection.close()
+    process.exit(0)
+})
 
 const PORT =  6000
 
