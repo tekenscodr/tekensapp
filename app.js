@@ -1,15 +1,15 @@
 const express = require('express')
 // const morgan = require('morgan')
-// const createError = require('http-errors')
-// const Customer = require('./models/customer')
-// const { verifyAccessToken } = require('./helpers/jwt_helper')
-// const { getEvents } = require('./controllers/events')
-// require('./helpers/init_redis')
-// const AuthRoute = require('./routes/auth')
-// const Events = require('./routes/events')
-// const Qrcode = require('./routes/qrcode')
+const createError = require('http-errors')
+const Customer = require('./models/customer')
+const { verifyAccessToken } = require('./helpers/jwt_helper')
+const { getEvents } = require('./controllers/events')
+require('./helpers/init_redis')
+const AuthRoute = require('./routes/auth')
+const Events = require('./routes/events')
+const Qrcode = require('./routes/qrcode')
 const cookieParser = require('cookie-parser')
-// const mongoose = require('mongoose')
+const mongoose = require('mongoose')
 const cors = require('cors');
 require('dotenv').config();
 const app = express()
@@ -32,64 +32,65 @@ app.get('/', (req, res)=>{
     res.send("You are in the server");
 })
 
-// app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
-//           try {
-//             let id = await req.payload;
-//             let user = await Customer.findOne({_id:id}).exec()
-//             console.log(user)  
-//             return res.json({...user._doc});
-//         }catch(err) {
-//             next(err)
-//         }
+app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
+          try {
+            let id = await req.payload;
+            let user = await Customer.findOne({_id:id}).exec()
+            console.log(user)  
+            return res.json({...user._doc});
+        }catch(err) {
+            next(err)
+        }
 
-// })
-// app.use('/auth', AuthRoute)
-// app.use('/events', Events)
-// app.use('/ticket', Qrcode)
+})
+app.use('/auth', AuthRoute)
+app.use('/events', Events)
+app.use('/ticket', Qrcode)
 
-// app.use(async(req, res, next) => {
-//     next(createError.NotFound())
-// })
+app.use(async(req, res, next) => {
+    next(createError.NotFound())
+})
 
-// app.use((err, req, res, next) => {
-//     res.status(err.status || 500)
-//     res.send({
-//         error: {
-//             status: err.status || 500,
-//             message: err.message,
-//         },
-//     })
-// })
+app.use((err, req, res, next) => {
+    res.status(err.status || 500)
+    res.send({
+        error: {
+            status: err.status || 500,
+            message: err.message,
+        },
+    })
+})
 
 //DATABASE CONNECTION
-// mongoose.connect(process.env.MONGODB_URI, {
-//     dbName: process.env.DB_NAME,
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
+mongoose.set('strictQuery', true)
+mongoose.connect(process.env.MONGODB_URI, {
+    dbName: process.env.DB_NAME,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
 
-// })
-// .then(() => {
-//     console.log('mongodb tekens connected')
-// })
-// .catch((err) => console.log(err.message))
+})
+.then(() => {
+    console.log('mongodb tekens connected')
+})
+.catch((err) => console.log(err.message))
 
-// mongoose.connection.on('connected', () => {
-//     console.log('mongodb connection established')
-// })
+mongoose.connection.on('connected', () => {
+    console.log('mongodb connection established')
+})
 
-// mongoose.connection.on('error', (err) =>{
-//     console.log(err.message)
-// })
+mongoose.connection.on('error', (err) =>{
+    console.log(err.message)
+})
 
-// mongoose.connection.on('disconnected', () => {
-//     console.log('mongoose connection disconnected')
-// })
+mongoose.connection.on('disconnected', () => {
+    console.log('mongoose connection disconnected')
+})
 
 
-// process.on('SIGINT', async () => {
-//     await mongoose.connection.close()
-//     process.exit(0)
-// })
+process.on('SIGINT', async () => {
+    await mongoose.connection.close()
+    process.exit(0)
+})
 
 const PORT =  6000
 
