@@ -1,7 +1,7 @@
 const express = require('express')
 // const morgan = require('morgan')
 const createError = require('http-errors')
-const Customer = require('./models/customer')
+const customer = require('./models/customer')
 const { verifyAccessToken } = require('./helpers/jwt_helper')
 const { getEvents } = require('./controllers/events')
 require('./helpers/init_redis')
@@ -35,7 +35,7 @@ app.get('/', (req, res)=>{
 app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
           try {
             let id = await req.payload;
-            let user = await Customer.findOne({_id:id}).exec()
+            let user = await customer.findOne({_id:id}).exec()
             console.log(user)  
             return res.json({...user._doc});
         }catch(err) {
