@@ -10,7 +10,6 @@ const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const {init, verify} = require('../helpers/payment')
-const axios = require('axios')
 const https = require('https')
 
 const fetch = (...args) =>
