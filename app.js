@@ -9,7 +9,7 @@ const express = require('express')
 // const Events = require('./routes/events')
 // const Qrcode = require('./routes/qrcode')
 const cookieParser = require('cookie-parser')
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
 const cors = require('cors');
 require('dotenv').config();
 const app = express()
