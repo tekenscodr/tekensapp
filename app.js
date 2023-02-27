@@ -5,6 +5,7 @@ const customer = require('./models/customer')
 const { verifyAccessToken } = require('./helpers/jwt_helper')
 const { getEvents } = require('./controllers/events')
 require('./helpers/init_redis')
+require('./helpers/init_mongo')
 const AuthRoute = require('./routes/auth')
 const Events = require('./routes/events')
 const Qrcode = require('./routes/qrcode')
@@ -61,36 +62,6 @@ app.use((err, req, res, next) => {
     })
 })
 
-//DATABASE CONNECTION
-mongoose.set('strictQuery', true)
-mongoose.connect(process.env.MONGODB_URI, {
-    dbName: process.env.DB_NAME,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-
-})
-.then(() => {
-    console.log('mongodb tekens connected')
-})
-.catch((err) => console.log(err.message))
-
-mongoose.connection.on('connected', () => {
-    console.log('mongodb connection established')
-})
-
-mongoose.connection.on('error', (err) =>{
-    console.log(err.message)
-})
-
-mongoose.connection.on('disconnected', () => {
-    console.log('mongoose connection disconnected')
-})
-
-
-process.on('SIGINT', async () => {
-    await mongoose.connection.close()
-    process.exit(0)
-})
 
 const PORT =  6000
 
