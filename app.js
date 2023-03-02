@@ -21,10 +21,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use('/uploads/', express.static('uploads'))
 
-const corsOption = {
-    origin: ['https://tekensapp.vercel.app/'],
-};
- app.use(cors(corsOption));
+// const corsOption = {
+//     origin: ['https://tekensapp.vercel.app/'],
+// };
+//  app.use(cors(corsOption));
 //if you want in every domain then
 app.use(cors())
 
