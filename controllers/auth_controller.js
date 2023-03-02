@@ -43,7 +43,7 @@ module.exports = {
 
             const isMatch = await customer.isValidPassword(result.password)
             if (!isMatch)
-            res.status(400).json("email/password not valid")
+                throw createError.Unauthorized("email/password not valid")
 
             const token = await signAccessToken(customer.id)
                 // const refreshToken = await signRefreshToken(customer.id)
@@ -54,8 +54,8 @@ module.exports = {
             //     secure: true,
             // });
         } catch (error) {
-            // if (error.isJoi === true)
-                res.status(500).json('error');
+            if (error.isJoi === true)
+                res.status(500).json("Invalid Email/Password")
             next(error)
         }
     },
