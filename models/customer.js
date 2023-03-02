@@ -9,7 +9,6 @@ const customerSchema = new Schema({
         type: String,
         required: true,
         lowercase: true,
-        unique: true,
     },
     phoneNumber: {
         type: String,
