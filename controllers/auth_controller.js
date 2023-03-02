@@ -54,7 +54,7 @@ module.exports = {
             //     secure: true,
             // });
         } catch (error) {
-            if (error.isJoi === true)
+            // if (error.isJoi === true)
                 res.status(500).json(error.isJoi);
             next(error)
         }
