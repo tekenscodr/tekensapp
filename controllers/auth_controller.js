@@ -55,7 +55,7 @@ module.exports = {
             // });
         } catch (error) {
             // if (error.isJoi === true)
-                res.status(500).json(error.isJoi);
+                res.status(500).json('error');
             next(error)
         }
     },
