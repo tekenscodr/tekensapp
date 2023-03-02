@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
+mongoose.set('strictQuery', true)
 
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(process.env.DEV_MONGODB_URI, {
+// mongoose.connect("mongodb+srv://ensleyb:tekens243@cluster0.rex1f.mongodb.net/test", {
     dbName: process.env.DB_NAME,
     useNewUrlParser: true,
     useUnifiedTopology: true,
