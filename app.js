@@ -1,5 +1,5 @@
 const express = require('express')
-// const morgan = require('morgan')
+const morgan = require('morgan')
 const createError = require('http-errors')
 const customer = require('./models/customer')
 const { verifyAccessToken } = require('./helpers/jwt_helper')
@@ -15,16 +15,16 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express()
 //middleware
-// app.use(morgan('dev'))
+app.use(morgan('dev'))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use('/uploads/', express.static('uploads'))
 
-// const corsOption = {
-//     origin: ['https://tekensapp.vercel.app/'],
-// };
-//  app.use(cors(corsOption));
+const corsOption = {
+    origin: ['https://tekensapp.vercel.app/'],
+};
+ app.use(cors(corsOption));
 //if you want in every domain then
 app.use(cors())
 
