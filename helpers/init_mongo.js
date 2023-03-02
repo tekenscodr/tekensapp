@@ -6,12 +6,9 @@ mongoose.connect(dbconnection, {
     dbName: process.env.DB_NAME,
     useNewUrlParser: true,
     useUnifiedTopology: true,
-
-})
-.then(() => {
+}).then(() => {
     console.log('mongodb tekens connected')
-})
-.catch((err) => console.log(err.message))
+}).catch((err) => console.log(err.message))
 
 mongoose.connection.on('connected', () => {
     console.log('mongodb connection established')
