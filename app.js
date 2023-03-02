@@ -15,7 +15,7 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express()
 //middleware
-app.use(morgan('dev'))
+// app.use(morgan('dev'))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
