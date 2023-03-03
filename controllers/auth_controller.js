@@ -56,8 +56,7 @@ module.exports = {
         } catch (error) {
             if (error.isJoi === true)
                 res.status(500).json("Invalid Email/Password" + `${error}`)
-            next(error)
-                
+            next(error)   
         }
     },
 
