@@ -43,9 +43,9 @@ module.exports = {
 
             const isMatch = await customer.isValidPassword(result.password)
             if (!isMatch)
-                throw createError.Unauthorized("email/password not valid")
+                throw createError.Unauthorized("email/password not valid");
 
-            const token = await signAccessToken(customer.id)
+            const token = await signAccessToken(customer.id);
                 // const refreshToken = await signRefreshToken(customer.id)
 
                 res.status(200).json({ token, ...customer._doc });
@@ -55,7 +55,7 @@ module.exports = {
             // });
         } catch (error) {
             if (error.isJoi === true)
-                res.status(500).json("Invalid Email/Password" + `${error}`)
+                res.status(500).json("Invalid Email/Password " + `${error}`)
             next(error)   
         }
     },
