@@ -35,22 +35,22 @@ const createEvent = async(req, res, next) => {
   
         const doesExist = await Event.findOne({ title: req.body.title });
         if (doesExist)
-            throw createError.Conflict(`${req.body.title} already exists`)
-            const imageName = randomImageName();
-            const params ={
-            Bucket: bucketName,
-            Key: imageName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
-            }
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
+            throw createError.Conflict(`${req.body.title} already exists`);
+        //     const imageName = randomImageName();
+        //     const params ={
+        //     Bucket: bucketName,
+        //     Key: imageName,
+        //     Body: req.file.buffer,
+        //     ContentType: req.file.mimetype,
+        //     }
+        // const command = new PutObjectCommand(params)
+        // await s3.send(command)
         
         
         const savedEvents = await Event(req.body)
-        savedEvents.banner = imageName    
+        // savedEvents.banner = imageName    
 
-        console.log(req.file)
+        // console.log(req.file)
 
         
       
@@ -106,7 +106,7 @@ const savedEvents = async(req, res, next) => {
     } catch (err) {
     res.status(500).json(err)
     }
-}
+} 
 
 
 //GET REQUEST ******* GET ALL EVENTS NEAR BY

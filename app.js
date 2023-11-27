@@ -52,7 +52,7 @@ app.use(async(req, res, next) => {
     next(createError.NotFound())
 })
 
-app.use((err, req, res, next) => {
+app.use((req, res, err) => {
     res.status(err.status || 500)
     res.send({
         error: {

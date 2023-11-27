@@ -6,29 +6,26 @@ const {
     signRefreshToken,
     verifyAccessToken
 } = require('../helpers/jwt_helper')
-const client = require('../helpers/init_redis')
+// const client = require('../helpers/init_redis')
 
 module.exports = {
     register: async(req, res, next) => {
-
         try {
-            const result = await authSchema.validateAsync(req.body)
-
-            const doesExist = await Customer.findOne({ email: result.email })
-            if (doesExist)
-                return res.status(409).json({message: "already registered"})
-            //TODO: add if empty to api 
-            
-            const customer = new Customer(result)
-            const savedUser = await customer.save()
-            //const token = await signAccessToken(savedUser.id)
-            //const refreshToken = await verifyAccessToken(savedUser.id)
-
-            res.status(200).json(savedUser); 
+            const result = await authSchema.validateAsync(req.body);
+    
+            const doesExist = await Customer.findOne({ email: result.email });
+            if (doesExist) {
+                return res.status(409).json({ message: "already registered" });
+            }
+    
+            // TODO: add if empty to API            
+            const customer = new Customer(result);
+            const savedUser = await customer.save();
+            res.status(200).json(savedUser);
         } catch (error) {
-            if (error === true) error.status = 422;
-            res.status(422).json({error: error.message})
             next(error)
+            return res.status(409).json({ message: error.message });
+            
         }
     },
 

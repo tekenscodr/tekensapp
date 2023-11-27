@@ -41,7 +41,7 @@ customerSchema.pre('save', async function(req, res, next) {
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(this.password, salt)
         this.password = hashedPassword
-        next()
+        // next()
     } catch (error) {
         next(error)
     }

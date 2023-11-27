@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 mongoose.set('strictQuery', true)
-const dbconnection = process.env.MONGODB_URI || "mongodb+srv://ensleyb:tekens243@cluster0.rex1f.mongodb.net/test";
+const dbconnection = process.env.MONGODB_URI || "mongodb+srv://ensleyb:tekens243@cluster0.rex1f.mongodb.net/tekens";
 
 mongoose.connect(dbconnection, {
     dbName: process.env.DB_NAME,

@@ -19,7 +19,7 @@ const GeoSchema = new Schema({
 const eventSchema = new Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
-    banner: { type: String, required: true },
+    banner: { type: String },
     category: { type: Array },
     variation: [
         { 
@@ -31,6 +31,12 @@ const eventSchema = new Schema({
     time: { type: String, required: true },
     price: { type: String },
     location: GeoSchema,
+    scanners: [
+        {
+            mobile: {type: String},
+            otp: {type: String},
+        }
+    ]
 }, 
 { timestamps: true }, 
 );

@@ -26,38 +26,34 @@ const fetch = (...args) =>
         region: region
     });
     
-    const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 const saveTicket = async(req, res, next) =>{
     try {
-        
-        /******************** Get All The Data From Endpoints ************************/
-        // const user = await fetch('http://localhost:3000/auth/:id')
-        //     let userId = await user.json(user)
-
         const userId = await req.payload  
-        const eventId = await fetch('https://tekensapp.vercel.app/events/63b4376894c8dd78b0d376e2')
+        const eventId = await fetch('http://localhost:6000/events/6564eae5f6f118322469a65e')
             .then(res => res.json())
 
         // Save Ticket into database
         const ticket = new Ticket({
             userId: userId,
-            eventId: eventId
+            eventId: "6564eae5f6f118322469a65e",
+            ticketVariations: req.body.ticketVariations
         });
-        const imageName = randomImageName();
-        const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
-            if(err) throw err;
-            return data
-        }) 
-            const params ={
-            Bucket: bucketName,
-            Key: imageName,
-            Body: code,
-        }
-        console.log (params)
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
+        // const imageName = randomImageName();
+        // const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
+        //     if(err) throw err;
+        //     return data
+        // }) 
+        //     const params ={
+        //     Bucket: bucketName,
+        //     Key: imageName,
+        //     Body: code,
+        // }
+        // console.log (params)
+        // const command = new PutObjectCommand(params)
+        // await s3.send(command)
 
-        ticket.eventName = imageName
+        // ticket.eventName = imageName
 
         ticket.save()
         res.status(200).json(ticket)
@@ -69,6 +65,66 @@ const saveTicket = async(req, res, next) =>{
         next(err)
     }
 }
+
+const updateTicket = async (req, res, next) => {
+    try {
+        const userEmail = req.body.userEmail;
+        const userId = req.payload;
+        const ticketId = req.body.ticketId;
+        const eventId = await fetch('http://localhost:6000/events/6564eae5f6f118322469a65e')
+
+        // Retrieve existing ticket for the user
+        const existingTicket = await Ticket.findOne({ _id: ticketId });
+
+        if (existingTicket) {
+            // Update existing ticket variations or quantity
+            existingTicket.ticketVariations = variations.map(variation => ({
+                variationName: variation.name,
+                quantity: existingTicket.ticketVariations.find(v => v.variationName === variation.name)?.quantity || 0 - variation.quantity,
+            }));
+
+            // Save the updated user ticket
+            await existingTicket.save();
+        }
+
+        // Create a new ticket for the non-user
+        const newTicket = new Ticket({
+            userId: userEmail,
+            eventId: eventId,
+            ticketVariations: variations.map(variation => ({
+                variationName: variation.name,
+                quantity: variation.quantity,
+            })),
+        });
+
+        // Save the new ticket to the database
+        await newTicket.save();
+
+        // Generate QR code for the non-user
+        // const qrCodeUrl = `${req.protocol}://${req.get('host')}/verify-ticket/${newTicket._id}`;
+        const qrCodeImage = await QRCode.toDataURL(newTicket.id);
+
+        // Save the QR code image to S3
+        const imageName = randomImageName();
+        const params = {
+            Bucket: bucketName,
+            Key: imageName,
+            Body: qrCodeImage.split(';base64,').pop(),
+            ContentType: 'image/png',
+        };
+        await s3.send(new PutObjectCommand(params));
+
+        // Update the new ticket with the QR code image name
+        newTicket.eventName = imageName;
+        await newTicket.save();
+
+        res.status(200).json({ message: 'Tickets updated and created successfully. QR Code saved.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal Server Error' });
+        next(err);
+    }
+};
 
 /****GET TICKETS BOUGHT BY A PARTICULAR USER********/
 const unscannedTicket = async(req, res, next) =>{
@@ -96,7 +152,6 @@ const unscannedTicket = async(req, res, next) =>{
         next(error)
     }
 }
-
 /*******All Tickets Bought By A Particular User That Are Scanned*****/
 const scannedTicket = async(req, res, next) =>{
     try {
@@ -134,7 +189,6 @@ const scannerTicket = async(req, res, next) =>{
         next(error)
     }
 }
-
 const eachTicket = async(req, res, next)=> {
     try {
         const event = await req.params.id
@@ -150,7 +204,6 @@ const buyTicket = async(req, res, next) => {
         let userId = await req.params.userId
         const result = await User.findOne({_id: userId})
         let email = result.email
-        console.log(email);
         const params = await JSON.stringify({
             "email": email,
             "amount": req.params.price
@@ -201,7 +254,8 @@ module.exports = {
             scannerTicket,
             eachTicket,
             buyTicket,
-            purchase
+            purchase,
+            updateTicket,
         }
 
 
