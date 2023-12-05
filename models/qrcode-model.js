@@ -15,6 +15,8 @@ const ticketSchema = new Schema({
 ],
     isScanned: { type: Boolean, default: false },
     timeScanned: { type: String,},
+    initialPurchase: {type: String},
+    transferedTicket: {type: String, default:"0"},
 }, { timestamp: true })
 
 const Ticket = mongoose.model('Ticket', ticketSchema)

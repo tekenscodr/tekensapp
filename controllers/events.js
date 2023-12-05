@@ -138,7 +138,7 @@ const getID = async(req, res, next) => {
         if (event == null) {
          return res.status(400).json({message: 'Cannot find event'})
         }
-         return res.status(200).json(event._id);
+         return res.status(200).json(event);
 
     } catch (err) {
         return res.status(500).json('Error: ' + err.message)

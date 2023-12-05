@@ -29,15 +29,17 @@ const fetch = (...args) =>
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 const saveTicket = async(req, res, next) =>{
     try {
-        const userId = await req.payload  
-        const eventId = await fetch('http://localhost:6000/events/6564eae5f6f118322469a65e')
-            .then(res => res.json())
-
+        const userId = await req.payload
+        const eventId = await req.params.id
+        // const eventId = await fetch('http://localhost:6000/events/6564eae5f6f118322469a65e')
+        //     .then(res => res.json());
+            const totalQuantityBought = req.body.ticketVariations.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
         // Save Ticket into database
         const ticket = new Ticket({
             userId: userId,
-            eventId: "6564eae5f6f118322469a65e",
-            ticketVariations: req.body.ticketVariations
+            eventId: eventId,
+            ticketVariations: req.body.ticketVariations,
+            initialPurchase: totalQuantityBought
         });
         // const imageName = randomImageName();
         // const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
@@ -68,63 +70,59 @@ const saveTicket = async(req, res, next) =>{
 
 const updateTicket = async (req, res, next) => {
     try {
-        const userEmail = req.body.userEmail;
-        const userId = req.payload;
-        const ticketId = req.body.ticketId;
-        const eventId = await fetch('http://localhost:6000/events/6564eae5f6f118322469a65e')
+        const userEmail = req.body.userId;
+        const ticketId = '656a2a3c6a9a6b04e7e16beb'; // Replace with the actual ticket _id
+        const eventId = req.body.eventId;
+        const totalQuantityBought = req.body.ticketVariations.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
 
         // Retrieve existing ticket for the user
-        const existingTicket = await Ticket.findOne({ _id: ticketId });
+        const existingTicket = await Ticket.findById(ticketId);
 
         if (existingTicket) {
-            // Update existing ticket variations or quantity
-            existingTicket.ticketVariations = variations.map(variation => ({
-                variationName: variation.name,
-                quantity: existingTicket.ticketVariations.find(v => v.variationName === variation.name)?.quantity || 0 - variation.quantity,
-            }));
+            // Deduct quantities based on the request body data
+            req.body.ticketVariations.forEach((deductionVariation) => {
+                const existingVariation = existingTicket.ticketVariations.find(
+                    (v) => v.name === deductionVariation.name
+                );
+                console.log(deductionVariation.quantity);
+                if (existingVariation) {
+                    // Deduct the quantity from the existing variation in the database
+                    existingVariation.quantity = Math.max(0, existingVariation.quantity - parseInt(deductionVariation.quantity, 10));
+                }
+            });
 
-            // Save the updated user ticket
+            // Save the updated existing ticket
+            transferTicket = await totalQuantityBought;
+            existingTicket.transferedTicket = await transferTicket;
             await existingTicket.save();
+
+            // Create a new ticket with the deducted quantities
+            const newTicketData = {
+                userId: userEmail,
+                eventId: eventId,
+                ticketVariations: req.body.ticketVariations.map((deductionVariation) => ({
+                    name: deductionVariation.name,
+                    quantity: deductionVariation.quantity
+                })),
+                initialPurchase: totalQuantityBought,
+            };
+
+            const newTicket = new Ticket(newTicketData);
+            await newTicket.save();
+
+            res.status(200).json({ message: 'Ticket updated successfully.' });
+        } else {
+            res.status(404).json({ error: 'Ticket not found.' });
         }
-
-        // Create a new ticket for the non-user
-        const newTicket = new Ticket({
-            userId: userEmail,
-            eventId: eventId,
-            ticketVariations: variations.map(variation => ({
-                variationName: variation.name,
-                quantity: variation.quantity,
-            })),
-        });
-
-        // Save the new ticket to the database
-        await newTicket.save();
-
-        // Generate QR code for the non-user
-        // const qrCodeUrl = `${req.protocol}://${req.get('host')}/verify-ticket/${newTicket._id}`;
-        const qrCodeImage = await QRCode.toDataURL(newTicket.id);
-
-        // Save the QR code image to S3
-        const imageName = randomImageName();
-        const params = {
-            Bucket: bucketName,
-            Key: imageName,
-            Body: qrCodeImage.split(';base64,').pop(),
-            ContentType: 'image/png',
-        };
-        await s3.send(new PutObjectCommand(params));
-
-        // Update the new ticket with the QR code image name
-        newTicket.eventName = imageName;
-        await newTicket.save();
-
-        res.status(200).json({ message: 'Tickets updated and created successfully. QR Code saved.' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Internal Server Error' });
         next(err);
     }
 };
+
+
+
 
 /****GET TICKETS BOUGHT BY A PARTICULAR USER********/
 const unscannedTicket = async(req, res, next) =>{
