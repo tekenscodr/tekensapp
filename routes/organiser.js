@@ -8,6 +8,9 @@ router.post('/register', AuthController.register);
 
 router.post('/login', AuthController.login);
 
+router.get('/veriify', verifyAccessToken)
+
+
 // router.get('/:id', AuthController.userId);
  
 // router.get('/getuser', AuthController.getUser);

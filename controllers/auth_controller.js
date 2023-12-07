@@ -57,7 +57,19 @@ module.exports = {
         }
     },
 
-    // getUser: async(req, res, next) => {
+   
+    userId: async(req, res, next) => {
+        try {
+            const id = await Customer.findById(req.params.id)
+            res.json(id);
+        } catch (err) {
+            res.send('Error: ' + err.message)
+            next(err)
+        }
+    }
+}
+
+ // getUser: async(req, res, next) => {
     //     try {
     //         let id = await "akbckabs";  
     //         res.json(id);
@@ -98,14 +110,3 @@ module.exports = {
     //         next(error)
     //     }
     // },
-
-    userId: async(req, res, next) => {
-        try {
-            const id = await Customer.findById(req.params.id)
-            res.json(id);
-        } catch (err) {
-            res.send('Error: ' + err.message)
-            next(err)
-        }
-    }
-}
