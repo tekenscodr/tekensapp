@@ -29,18 +29,18 @@ const register = async(req, res, next) =>{
 const login = async(req, res, next) => {
     try {
         const result = await loginSchema.validateAsync(req.body)
-        const customer = await Customer.findOne({ email: result.email })
-        if (!customer) throw createError.NotFound("User not registered")
+        const organiser = await Organiser.findOne({ email: result.email })
+        if (!organiser) throw createError.NotFound("User not registered")
         
         //TODO: add if empty to api
-        const isMatch = await customer.isValidPassword(result.password)
+        const isMatch = await organiser.isValidPassword(result.password)
         if (!isMatch)
             throw createError.Unauthorized("email/password not valid");
 
-        const token = await signAccessToken(customer.id);
+        const token = await signAccessToken(organiser.id);
             // const refreshToken = await signRefreshToken(customer.id)
 
-            res.status(200).json({ token, ...customer._doc });
+            res.status(200).json({ token, ...organiser._doc });
     } catch (error) {
         if (error.isJoi === true)
             res.status(500).json("Invalid Email/Password " + `${error}`)
