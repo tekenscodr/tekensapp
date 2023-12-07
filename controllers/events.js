@@ -1,5 +1,6 @@
 const Event = require('../models/event-model')
 const User = require('../models/customer');
+const Saved = require('../models/saved')
 const createError = require('http-errors')
 require('dotenv')
 const crypto = require('crypto')

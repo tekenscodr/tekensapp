@@ -47,6 +47,7 @@ app.get('/getuser', verifyAccessToken, async (req, res, next)=>{
 app.use('/auth', AuthRoute)
 app.use('/events', Events)
 app.use('/ticket', Qrcode)
+app.use('/organiser', Organiser)
 
 app.use(async(req, res, next) => {
     next(createError.NotFound())
