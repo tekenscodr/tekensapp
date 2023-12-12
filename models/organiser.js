@@ -17,7 +17,16 @@ const organiserSchema = new Schema({
         type: String,
         required: true,
     },
-    name: {
+    organisation: {
+        type: String,
+        required: true,
+        default: "Tekens",
+    },
+    role: {
+        type: String,
+        required: true,
+    },
+    fullname: {
         type: String,
         required: true,
     }
