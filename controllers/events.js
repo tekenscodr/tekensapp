@@ -144,8 +144,26 @@ const getID = async(req, res, next) => {
     } catch (err) {
         return res.status(500).json('Error: ' + err.message)
     }
-    res.event = event
-    next()
+
+}
+
+
+const scanner = async(req, res, next) => {
+    try {
+        const eventId = await req.params.eventId
+        const event = await Event.findById(eventId)
+        const scannerNumber = await req.body;
+        const scannerMatch = await event.scanners.find(scanner => scanner.mobile === scannerNumber) //check this code before you parse
+
+        if (scannerMatch) {
+            res.status(200).json({ message: 'Mobile contact found in scanners array!' });
+          } else {
+            res.status(400).json({ message: 'Mobile contact not found in scanners array!' });
+          }
+        
+    } catch (error) {
+        return res.status(500).json('Error: ' + err.message)
+    }
 }
 module.exports = { 
                     createEvent, 
@@ -153,7 +171,9 @@ module.exports = {
                     eventSave,
                     savedEvents, 
                     getID,
-                    nearMe,}
+                    nearMe,
+                    scanner,
+                }
 
       // const events = await Event.find()
         // res.json(events)
