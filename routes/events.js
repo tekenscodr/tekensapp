@@ -8,7 +8,8 @@ router.get('/', Event.getEvents)
 router.get('/:eventId')
 router.get('/nearme', Event.nearMe)
 router.get('/saved', Event.eventSave)
-
+router.get('/scanner/:id')
+router.post('/scanner/login', Event.scanner)
 // router.get('/get', Event.getEvents)
 
 router.get('/:id', Event.getID)
