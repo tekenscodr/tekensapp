@@ -96,6 +96,7 @@ const eventSave = async(req, res, next) => {
 const getSavedEvents = async (req, res, next) => {
     try {
         const userId = req.payload;
+        console.log(userId);
         if (!userId) {
             return res.status(400).json({ "message": "No user entered" });
         }
