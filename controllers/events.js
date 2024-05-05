@@ -102,12 +102,15 @@ const getSavedEvents = async (req, res, next) => {
         }
 
         const eventIds = results.map(result => result.eventId); // Extracting event IDs
-        const events = await Event.findById({ _id:  eventIds }); // Querying events by IDs
+        const events = await Event.find({ _id:  eventIds }); // Querying events by IDs
 
         if (events.length === 0) {
             console.log(events.length);
             return res.status(200).json({ "message": "No records found" });
         }
+        for(const event of events) {
+            event.imageUrl = 'https://d1v5yq7t85t3r8.cloudfront.net'+ event.imageName;
+            }
 
         res.status(200).json(events);
     } catch (err) {
