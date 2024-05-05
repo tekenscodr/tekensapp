@@ -97,9 +97,11 @@ const getSavedEvents = async (req, res, next) => {
     try {
         const userId = req.payload;
         console.log(userId);
-        if (!userId) {
-            return res.status(400).json({ "message": "No user entered" });
-        }
+            if (!userId) {
+                return res.status(400).json({ "message": "No user entered" });
+            } else {
+                res.status(200).json(userId);
+            }
 
         const results = await Saved.find({ userId: userId });
         if (results.length === 0) {
