@@ -430,7 +430,6 @@ module.exports = {
             scannerTicket,
             eachTicket,
             buyTicket,
-            purchase,
             updateTicket,
             cancelTicket,
             purchseForAnother,
