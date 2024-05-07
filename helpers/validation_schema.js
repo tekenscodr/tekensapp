@@ -22,7 +22,7 @@ const authSchema = Joi.object({
 })
 
 const loginSchema = Joi.object({
-    email: Joi.string().email().lowercase().required(),
+    phoneNumber: Joi.string().required(),
     password: Joi.string().min(8).required()
 })
 
