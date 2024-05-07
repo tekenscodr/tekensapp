@@ -175,15 +175,26 @@ const scanner = async(req, res, next) => {
         return res.status(500).json('Error: ' + err.message)
     }
 }
+
+// ::::TODO Search Route
+const search = async(req, res, next) => {
+    try {
+        
+    } catch (error) {
+        res.status(500).json(error)
+        next(error)
+    }
+}
 module.exports = { 
-                    createEvent, 
-                    getEvents,
-                    eventSave,
-                    getSavedEvents, 
-                    getID,
-                    nearMe,
-                    scanner,
-                }
+        createEvent, 
+        getEvents,
+        eventSave,
+        getSavedEvents, 
+        getID,
+        nearMe,
+        scanner,
+        search,
+    }
 
       // const events = await Event.find()
         // res.json(events)

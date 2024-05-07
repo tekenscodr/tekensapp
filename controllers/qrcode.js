@@ -10,7 +10,8 @@ const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const {init, verify} = require('../helpers/payment')
-const https = require('https')
+const https = require('https');
+const Purchase = require('../models/purchase');
 
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -31,11 +32,12 @@ const s3 = new S3Client({
     
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
-// PURCHASED TICKET 
+// PURCHASED TICKET FOR SELF
 const saveTicket = async(req, res, next) =>{
     try {
         const userId = await req.payload
         const eventId = await req.params.id
+        const refernceId = await req.params.refernceId //Check the refernceId from Paystack
         const totalQuantityBought = 
             req.body.ticketVariations.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
         // Save Ticket into database
@@ -43,23 +45,32 @@ const saveTicket = async(req, res, next) =>{
             userId: userId,
             eventId: eventId,
             ticketVariations: req.body.ticketVariations,
-            initialPurchase: totalQuantityBought
-        });
-        // const imageName = randomImageName();
-        // const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
-        //     if(err) throw err;
-        //     return data
-        // }) 
-        //     const params ={
-        //     Bucket: bucketName,
-        //     Key: imageName,
-        //     Body: code,
-        // }
-        // console.log (params)
-        // const command = new PutObjectCommand(params)
-        // await s3.send(command)
+            initialPurchase: totalQuantityBought,
 
-        // ticket.eventName = imageName
+        });
+        // Save to purchase after ticket is created
+        if (!ticket){
+            const purchase = new Purchase({
+                ticketId:ticket._id,
+                buyerId: userId,
+                referenceId: refernceId //::::Not sure::::
+            })
+        }
+        const imageName = randomImageName();
+        const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
+            if(err) throw err;
+            return data
+        }) 
+            const params ={
+            Bucket: bucketName,
+            Key: imageName,
+            Body: code,
+        }
+        console.log (params)
+        const command = new PutObjectCommand(params)
+        await s3.send(command)
+
+        ticket.qrcode = imageName
 
         ticket.save()
         res.status(200).json(ticket)
@@ -69,12 +80,107 @@ const saveTicket = async(req, res, next) =>{
     }
 }
 
+// PURCHASE TICKET FOR ANOTHER
+const purchseForAnother = async(req, res, next) =>{
+    try {
+        const buyerId = await req.payload
+        const eventId = await req.params.id
+        const refernceId = await req.params.refernceId
+        const userDetails = await req.body
+        const checkUserExist = await User.findOne({phoneNumber: userDetails.phoneNumber})
+        if(!checkUserExist){
+            // Create and Save user
+            const customer = new User(userDetails);
+            const savedUser = await customer.save();
+            const totalQuantityBought = req.body.ticketVariations.reduce(
+                (total, variation) => total + parseInt(variation.quantity, 10), 0);
+            // Save Ticket into database
+            const ticket = new Ticket({
+                userId: savedUser._id,
+                eventId: eventId,
+                ticketVariations: req.body.ticketVariations,
+                initialPurchase: totalQuantityBought,
+            });
+             // Save to purchase after ticket is created
+
+            const purchase = new Purchase({
+                ticketId:ticket._id,
+                buyerId: buyerId,
+                buyeeId: savedUser._id,
+                referenceId: refernceId //Replace this id from payment platform eg Paystack
+            })
+            
+            
+            const imageName = randomImageName();
+            const code = await QRCode.toString(`${userId} + ${eventId} + ${Date.now}`, (err, data) =>{ 
+                if(err) throw err;
+                return data
+            }) 
+                const params ={
+                Bucket: bucketName,
+                Key: imageName,
+                Body: code,
+            }
+            console.log (params)
+            const command = new PutObjectCommand(params)
+            await s3.send(command)
+    
+            ticket.qrcode = imageName
+    
+            ticket.save();
+            purchase.save()
+            res.status(200).json(ticket)
+         }else{
+            const totalQuantityBought = req.body.ticketVariations.reduce(
+                (total, variation) => total + parseInt(variation.quantity, 10), 0);
+            // Save Ticket into database
+            const ticket = new Ticket({
+                userId: checkUserExist._id,
+                eventId: eventId,
+                ticketVariations: req.body.ticketVariations,
+                initialPurchase: totalQuantityBought,
+            });
+             // Save to purchase after ticket is created
+            const purchase = new Purchase({
+                ticketId:ticket._id,
+                buyerId: buyerId,
+                buyeeId: checkUserExist._id,
+                referenceId: refernceId //Replace this id from payment platform eg Paystack
+            })
+        
+            const imageName = randomImageName();
+            const code = await QRCode.toString(`${userId} + ${eventId} + ${Date.now}`, (err, data) =>{ 
+                if(err) throw err;
+                return data
+            }) 
+                const params ={
+                Bucket: bucketName,
+                Key: imageName,
+                Body: code,
+            }
+            console.log (params)
+            const command = new PutObjectCommand(params)
+            await s3.send(command)
+    
+            ticket.qrcode = imageName
+    
+            ticket.save()
+            purchase.save()
+            res.status(200).json(ticket)
+         }
+    } catch (err) {
+        res.json(err.message)
+        next(err)
+    }
+}
+// TICKET TRANSFER
 const updateTicket = async (req, res, next) => {
     try {
         const userEmail = req.body.userId;
         const ticketId = '656a2a3c6a9a6b04e7e16beb'; // Replace with the actual ticket _id
-        const eventId = req.body.eventId;
-        const totalQuantityBought = req.body.ticketVariations.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
+        const eventId = req.body.eventId; //Could derrived from ticketId
+        const totalQuantityBought = req.body.ticketVariations.reduce(
+            (total, variation) => total + parseInt(variation.quantity, 10), 0);
 
         // Retrieve existing ticket for the user
         const existingTicket = await Ticket.findById(ticketId);
@@ -107,6 +213,22 @@ const updateTicket = async (req, res, next) => {
                 })),
                 initialPurchase: totalQuantityBought,
             };
+            const imageName = randomImageName();
+            const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
+                if(err) throw err;
+                return data
+            }) 
+                const params ={
+                Bucket: bucketName,
+                Key: imageName,
+                Body: code,
+            }
+            console.log (params)
+            const command = new PutObjectCommand(params)
+            await s3.send(command)
+    
+            newTicketData.qrcode = imageName
+    
 
             const newTicket = new Ticket(newTicketData);
             await newTicket.save();
@@ -125,9 +247,9 @@ const updateTicket = async (req, res, next) => {
 /** GET ONE TICKET */
 const eachTicket = async(req, res, next)=> {
     try {
-        const event = await req.params.id
+        const ticketId = await req.params.id
         //  const ticket = fetch()
-        const ticket = await Ticket.findOne({_id : event})
+        const ticket = await Ticket.findOne({_id : ticketId})
             res.status(200).json(ticket)
     } catch (error) {
         next(error)
@@ -144,7 +266,7 @@ const unscannedTicket = async(req, res, next) =>{
         if(tickets == 0) throw("There are no tickets");
         
         
-        pending = await Promise.all(tickets.map(async (ticket) => {
+       const pending = await Promise.all(tickets.map(async (ticket) => {
             let event = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
@@ -155,8 +277,10 @@ const unscannedTicket = async(req, res, next) =>{
                 event
              };
             }));
-            res.json(pending);
+
+            return res.status(200).json(pending);
     } catch (error) {
+        res.status(500).json(error);
         next(error)
     }
 }
@@ -180,14 +304,13 @@ const scannedTicket = async(req, res, next) =>{
              };
             }))
             res.status(200).json(scanned);
-
-
     } catch (error) {
+        res.status(500).json(error);
         next(error)
     }
 }
 //:TODO => check for how to update using mongoose
-const canceledTicket = async(req, res, next) => {
+const cancelTicket = async(req, res, next) => {
     try {
         const ticketId = req.params 
         const ticket = await Ticket.findByIdAndUpdate(ticketId, {
@@ -197,11 +320,41 @@ const canceledTicket = async(req, res, next) => {
         }, { new:true })
         
         ({_id:ticketId}).where({"isCanceled": true})
+        
           res.status(200).json({ticket})
     } catch (error) {
         next(error)
         res.status(500).json({'msg': error, 'status': "Failed"})
     }c
+}
+
+/*******All Tickets Canceled By A Particular User*****/
+const canceledTicket = async(req, res, next) =>{
+    try {
+        
+        let userId = await req.payload;  
+        let tickets = await Ticket.find({userId:userId}).where({"isCanceled": true});
+        /** if condition*/
+        if(tickets == 0) throw("There are no tickets");
+        
+        
+       const pending = await Promise.all(tickets.map(async (ticket) => {
+            let event = await Event.findOne({
+                _id:mongoose.Types.ObjectId(ticket.eventId)
+            }).lean()
+            ticket.event_details = event
+            
+            return {
+                ticket,
+                event
+             };
+            }));
+
+            return res.status(200).json(pending);
+    } catch (error) {
+        res.status(500).json(error);
+        next(error)
+    }
 }
 
 
@@ -221,7 +374,7 @@ const scannerTicket = async(req, res, next) =>{
 // PURCHASE DONE USING USSD
 const buyTicket = async(req, res, next) => {
     try {
-        let userId = await req.params.userId
+        let userId = await req.payload
         const result = await User.findOne({_id: userId})
         let email = result.email
         const params = await JSON.stringify({
@@ -264,9 +417,9 @@ const buyTicket = async(req, res, next) => {
     }
 }
 /****Why are you not running */
-const purchase = async(req, res) => {
-    res.send("God is good!!")
-}
+// const purchase = async(req, res) => {
+//     res.send("God is good!!")
+// }
 
 
 
@@ -279,7 +432,9 @@ module.exports = {
             buyTicket,
             purchase,
             updateTicket,
-            canceledTicket,
+            cancelTicket,
+            purchseForAnother,
+            canceledTicket
         }
 
 

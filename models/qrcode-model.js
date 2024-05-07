@@ -11,11 +11,13 @@ const ticketSchema = new Schema({
             quantity: {type: String, required:true},
         }
 ],
-    isCanceled: { type:Boolean, defaukt:false },
+    qrcode: {type:String, required:true},
+    isCanceled: { type:Boolean, default:false },
     isScanned: { type: Boolean, default: false },
     timeScanned: { type: String,},
     initialPurchase: {type: String},
     transferedTicket: {type: String, default:"0"},
+    transferedFrom: {type: String, }
 }, { timestamp: true })
 
 const Ticket = mongoose.model('Ticket', ticketSchema)
