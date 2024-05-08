@@ -38,7 +38,7 @@ const eventSchema = new Schema({
     time: { type: String, required: true },
     price: { type: String },
     location: GeoSchema,
-    scanners: [Scanners],
+    scanners: [scannersSchema],
 }, 
 { timestamps: true }, 
 );
