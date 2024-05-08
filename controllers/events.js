@@ -54,7 +54,7 @@ const createEvent = async(req, res, next) => {
         // console.log(req.file)
         saveScanners.save()
         savedEvents.save().then(item => {
-            res.send('Events saved');
+            res.send('Events saved...');
         })
 
        
