@@ -67,6 +67,9 @@ try {
     for(const event of events) {
     event.imageUrl = 'https://d1v5yq7t85t3r8.cloudfront.net'+ event.imageName;
     }
+    if(events.length === 0){
+        res.status(200).json("No record found")
+    }
     res.status(200).json(events);
     } catch (err) {
         res.json('Error: '+ err.message);
