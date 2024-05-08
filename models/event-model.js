@@ -17,8 +17,8 @@ const GeoSchema = new Schema({
 })
 const scannersSchema = new Schema({
     scanners: {
-    mobile: {type: String},
-    otp: {type: String},
+    mobile: {type: String, required: true},
+    otp: {type: String,  required: true},
 }
 
 })
