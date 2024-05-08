@@ -15,6 +15,13 @@ const GeoSchema = new Schema({
 
     
 })
+const scannersSchema = new Schema({
+    scanners: {
+    mobile: {type: String},
+    otp: {type: String},
+}
+
+})
 
 const eventSchema = new Schema({
     title: { type: String, required: true },
@@ -31,12 +38,7 @@ const eventSchema = new Schema({
     time: { type: String, required: true },
     price: { type: String },
     location: GeoSchema,
-    scanners: [
-        {
-            mobile: {type: String},
-            otp: {type: String},
-        }
-    ]
+    scanners: [Scanners],
 }, 
 { timestamps: true }, 
 );
@@ -45,4 +47,7 @@ const eventSchema = new Schema({
 
 // const location = mongoose.model('goeschema', GeoSchema)
 const Event = mongoose.model('event', eventSchema)
+const Scanners = mongoose.model('scanner', scannersSchema)
+
 module.exports = Event
+module.exports = Scanners
