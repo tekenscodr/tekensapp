@@ -7,6 +7,7 @@ const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { eventNames } = require('../models/event-model');
+const Scanners = require('../models/event-model');
 const fetch = (...args) =>
     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -37,19 +38,21 @@ const createEvent = async(req, res, next) => {
         if (doesExist)
             throw createError.Conflict(`${req.body.title} already exists`);
        
-            const imageName = randomImageName();
-            const params ={
-            Bucket: bucketName,
-            Key: imageName,
-            Body: req.file.buffer,
-            ContentType: req.file.mimetype,
-            }
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
+        //     const imageName = randomImageName();
+        //     const params ={
+        //     Bucket: bucketName,
+        //     Key: imageName,
+        //     Body: req.file.buffer,
+        //     ContentType: req.file.mimetype,
+        //     }
+        // const command = new PutObjectCommand(params)
+        // await s3.send(command)
     
         const savedEvents = await Event(req.body)
-        savedEvents.banner = imageName    
-        console.log(req.file)
+        const saveScanners = await Scanners(req.body.scanners)
+        // savedEvents.banner = imageName    
+        // console.log(req.file)
+        saveScanners.save()
         savedEvents.save().then(item => {
             res.send('Events saved');
         })
