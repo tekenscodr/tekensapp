@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+const Scanners = require('./scanner')
 const GeoSchema = new Schema({
     location: {
         type: {
@@ -15,17 +15,11 @@ const GeoSchema = new Schema({
 
     
 })
-const scannersSchema = new Schema({
-    scanners: {
-    mobile: {type: String, required: true},
-    otp: {type: String,  required: true},
-}
-
-})
 
 const eventSchema = new Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
+    userId: {type: String},
     banner: { type: String },
     category: { type: Array },
     variation: [
@@ -38,7 +32,10 @@ const eventSchema = new Schema({
     time: { type: String, required: true },
     price: { type: String },
     location: GeoSchema,
-    scanners: [scannersSchema],
+    scanners: [{
+        type: Schema.Types.ObjectId,
+        ref: 'scanner'
+    }],
 }, 
 { timestamps: true }, 
 );
@@ -47,7 +44,5 @@ const eventSchema = new Schema({
 
 // const location = mongoose.model('goeschema', GeoSchema)
 const Event = mongoose.model('event', eventSchema)
-const Scanners = mongoose.model('scanner', scannersSchema)
 
 module.exports = Event
-module.exports = Scanners

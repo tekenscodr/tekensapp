@@ -49,10 +49,8 @@ const createEvent = async(req, res, next) => {
         // await s3.send(command)
     
         const savedEvents = await Event(req.body)
-        const saveScanners = await Scanners(req.body.scanners)
         // savedEvents.banner = imageName    
         // console.log(req.file)
-        saveScanners.save()
         savedEvents.save().then(item => {
             res.send('Events saved...1');
         })

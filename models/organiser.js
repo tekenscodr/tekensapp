@@ -4,32 +4,17 @@ const bcrypt = require('bcryptjs')
 
 
 const organiserSchema = new Schema({
-    email: {
-        type: String,
-        required: true,
-        lowercase: true,
-    },
-    phoneNumber: {
-        type: String,
-        required: true,
-    },
-    password: {
-        type: String,
-        required: true,
-    },
-    organisation: {
+    organisationName: {
         type: String,
         required: true,
         default: "Tekens",
     },
-    role: {
+    userId: {
         type: String,
         required: true,
     },
-    fullname: {
-        type: String,
-        required: true,
-    }
+    
+
 })
 
 
