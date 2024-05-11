@@ -63,6 +63,15 @@ module.exports = {
             res.send('Error: ' + err.message)
             next(err)
         }
+    },
+    
+    identifyByPayload: async(req, res, next) => {
+        try {
+            const userId = await req.payload
+            const id = await Customer.findById(userId)
+        } catch (error) {
+            
+        }
     }
 }
 

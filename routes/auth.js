@@ -9,7 +9,10 @@ router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 
 router.get('/:id', AuthController.userId);
-router.get('/veriify', verifyAccessToken)
+router.get('/veriify', verifyAccessToken);
+
+// REQUETS USER DETAILS BY PAYLOAD
+router.get('/self', verifyAccessToken, AuthController.identifyByPayload);
  
 // router.get('/getuser', AuthController.getUser);
 
