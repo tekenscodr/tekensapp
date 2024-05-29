@@ -4,7 +4,7 @@ const Ticket = require('../controllers/qrcode')
 const {verifyAccessToken} = require('../helpers/jwt_helper')
 
 
-router.post('/:eventId/:refernceId', verifyAccessToken, Ticket.saveTicket)
+router.post('/:eventId/:referenceId', verifyAccessToken, Ticket.saveTicket)
 router.get('/pending', verifyAccessToken, Ticket.unscannedTicket)
 router.get('/scanner', Ticket.scannerTicket) //gets organisers scanned tickets
 router.get('/pay/:userId/:price', Ticket.buyTicket)

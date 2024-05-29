@@ -34,58 +34,57 @@ const s3 = new S3Client({
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
 // PURCHASED TICKET FOR SELF USING WEB OR APP
-const saveTicket = async(req, res, next) =>{
+const saveTicket = async (req, res, next) => {
     try {
-        const userId = await req.payload
-        const eventId = await req.params.eventId
-        const refernceId = await req.params.refernceId //Check the refernceId from Paystack
-        const verifyPayment = await fetch(`https://api.paystack.co/transaction/verify/${referenceId}`,
-        { headers:{authorization:`Authorization: ${process.env.PAYSTACK_AUTH_LKEY}`}})
-        
-        if(verifyPayment.status == true || verifyPayment.message == "Verification successful"){
-            const totalQuantityBought = 
-            req.body.ticketVariations.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
-        // Save Ticket into database
-        const ticket = new Ticket({
+      const userId = req.payload
+      const eventId = req.params.eventId
+      const referenceId = req.params.referenceId
+      const verifyPayment = await fetch(`https://api.paystack.co/transaction/verify/${referenceId}`, {
+        headers: { Authorization: `Bearer ${process.env.PAYSTACK_AUTH_LKEY}` }
+      })
+  
+      if (verifyPayment.status === 200 || verifyPayment.status === 201) {
+        if (req.body) {
+            const ticketVariationsArray = Object.entries(req.body).map(([name, quantity]) => ({ name, quantity }));
+            const totalQuantityBought =
+            ticketVariationsArray.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
+          const ticket = new Ticket({
             userId: userId,
             eventId: eventId,
-            ticketVariations: req.body.ticketVariations,
+            ticketVariations: ticketVariationsArray,
             initialPurchase: totalQuantityBought,
-
-        });
-        // Save to purchase after ticket is created
-        if (!ticket){
+          })
+  
+          const imageName = randomImageName()
+          ticket.qrcode = imageName
+  
+          await ticket.save()
+          console.log(ticket)
+  
+          if (ticket) {
             const purchase = new Purchase({
-                ticketId:ticket._id,
-                buyerId: userId,
-                referenceId: refernceId //::::Not sure::::
+              ticketId: ticket._id,
+              buyerId: userId,
+              referenceId: referenceId
             })
+            await purchase.save()
+          }
+          return res.status(200).json(ticket)
+        } else {
+          console.log(req.body)
+          console.log("Ticket variations is empty or not an array")
+          return res.status(500).json({ "message": "Ticket not saved" })
         }
-        const imageName = randomImageName();
-        const code = await QRCode.toString(`${userId} + ${eventId}`, (err, data) =>{ 
-            if(err) throw err;
-            return data
-        }) 
-            const params ={
-            Bucket: bucketName,
-            Key: imageName,
-            Body: code,
-        }
-        console.log (params)
-        const command = new PutObjectCommand(params)
-        await s3.send(command)
-
-        ticket.qrcode = imageName
-
-        ticket.save()
-        res.status(200).json(ticket)
-        }
-       
+      } else {
+        console.log("Payment not verified")
+        return res.status(500).json({ "message": "Ticket not saved" })
+      }
     } catch (err) {
-        res.json(err.message)
-        next(err)
+      next(err)
+      console.log(err)
+      return res.json(err.message)
     }
-}
+  }
 
 // PURCHASE TICKET FOR ANOTHER
 const purchseForAnother = async(req, res, next) =>{
@@ -171,8 +170,8 @@ const purchseForAnother = async(req, res, next) =>{
     
             ticket.qrcode = imageName
     
-            ticket.save()
-            purchase.save()
+            await ticket.save()
+            await purchase.save()
             res.status(200).json(ticket)
          }
     } catch (err) {
