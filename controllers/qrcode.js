@@ -12,6 +12,7 @@ const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/clien
 const {init, verify} = require('../helpers/payment')
 const https = require('https');
 const Purchase = require('../models/purchase');
+require('dotenv')
 
 const fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
@@ -32,13 +33,17 @@ const s3 = new S3Client({
     
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
-// PURCHASED TICKET FOR SELF
+// PURCHASED TICKET FOR SELF USING WEB OR APP
 const saveTicket = async(req, res, next) =>{
     try {
         const userId = await req.payload
-        const eventId = await req.params.id
+        const eventId = await req.params.eventId
         const refernceId = await req.params.refernceId //Check the refernceId from Paystack
-        const totalQuantityBought = 
+        const verifyPayment = await fetch(`https://api.paystack.co/transaction/verify/${referenceId}`,
+        { headers:{authorization:`Authorization: ${process.env.PAYSTACK_AUTH_LKEY}`}})
+        
+        if(verifyPayment.status == true || verifyPayment.message == "Verification successful"){
+            const totalQuantityBought = 
             req.body.ticketVariations.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
         // Save Ticket into database
         const ticket = new Ticket({
@@ -74,6 +79,8 @@ const saveTicket = async(req, res, next) =>{
 
         ticket.save()
         res.status(200).json(ticket)
+        }
+       
     } catch (err) {
         res.json(err.message)
         next(err)

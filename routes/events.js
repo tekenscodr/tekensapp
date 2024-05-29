@@ -12,7 +12,7 @@ router.post('/saved/:eventId', verifyAccessToken, Event.eventSave)
 router.get('/saved', verifyAccessToken, Event.getSavedEvents)
 router.get('/scanner/:id')
 router.post('/scanner/login', Event.scanner)
-// router.get('/get', Event.getEvents)
+router.get('/:category', Event.getEventsByCategory)
 
 router.get('/:id', Event.getID)
 

@@ -96,6 +96,20 @@ const eventSave = async(req, res, next) => {
     }
 }
 
+const getEventsByCategory = async(req,res,next)=>{
+    try {
+        const category = await req.params.category
+        const events = await Event.find({category:category});
+        if (!events) {
+            res.status(500).json({message: "No records found"})
+        }
+        res.status(200).json({message: "No records found", events})
+    } catch (error) {
+        res.status(500).json({message: `An error occurred: ${error}`});
+        next(error)
+    }
+}
+
 // GET REQUEST ********GET ALL SAVED
 const getSavedEvents = async (req, res, next) => {
     try {
@@ -198,6 +212,7 @@ module.exports = {
         nearMe,
         scanner,
         search,
+        getEventsByCategory,
     }
 
       // const events = await Event.find()
