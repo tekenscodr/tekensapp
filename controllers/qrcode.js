@@ -67,9 +67,15 @@ const saveTicket = async (req, res, next) => {
               buyerId: userId,
               referenceId: referenceId
             })
-            await purchase.save()
+            await purchase.save();
+            const event = await Event.findById(eventId)
+            if (!event){
+                res.status(500).json({"message":"Event not found"})
+            }
+            const eventTicket = await {event, ...ticket}
+            return res.status(201).json(eventTicket)
           }
-          return res.status(200).json(ticket)
+          
         } else {
           console.log(req.body)
           console.log("Ticket variations is empty or not an array")
