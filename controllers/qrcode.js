@@ -82,8 +82,8 @@ const saveTicket = async (req, res, next) => {
           return res.status(500).json({ "message": "Ticket not saved" })
         }
       } else {
-        console.log("Payment not verified")
-        return res.status(500).json({ "message": "Ticket not saved" })
+        console.log("Payment not verified!!")
+        return res.status(500).json({ "message": "Ticket not saved!!" })
       }
     } catch (err) {
       next(err)
