@@ -72,7 +72,7 @@ const saveTicket = async (req, res, next) => {
             if (!event){
                 res.status(500).json({"message":"Event not found"})
             }
-            const eventTicket = await {event, ...ticket}
+            const eventTicket = await {event, ...ticket._doc}
             return res.status(201).json(eventTicket)
           }
           
