@@ -45,7 +45,7 @@ const saveTicket = async (req, res, next) => {
   
       if (verifyPayment.status === 200 || verifyPayment.status === 201) {
         if (req.body) {
-            const ticketVariationsArray = Object.entries(req.body).map(([name, quantity]) => ({ name, quantity }));
+            const ticketVariationsArray = req.body.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price }));
             const totalQuantityBought =
             ticketVariationsArray.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
           const ticket = new Ticket({

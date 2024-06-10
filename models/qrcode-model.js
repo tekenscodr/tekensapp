@@ -9,7 +9,7 @@ const ticketSchema = new Schema({
         { 
             name: {type: String, required:true},
             quantity: {type: String, required:true},
-            price: {type: String}
+            price: {type: String, required:true}
         }
 ],
     qrcode: {type:String, required:true},
