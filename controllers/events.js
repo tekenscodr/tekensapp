@@ -126,9 +126,9 @@ const getSavedEvents = async (req, res, next) => {
             console.log(events.length);
             return res.status(200).json({ "message": "No records found" });
         }
-        for(const event of events) {
-            event.imageUrl = 'https://d1v5yq7t85t3r8.cloudfront.net'+ event.imageName;
-            }
+        // for(const event of events) {
+        //     event.imageUrl = 'https://d1v5yq7t85t3r8.cloudfront.net'+ event.imageName;
+        //     }
 
         res.status(200).json(events);
     } catch (err) {
