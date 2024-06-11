@@ -81,7 +81,7 @@ try {
 // POST REQUEST ****** SAVED EVENTS
 const eventSave = async(req, res, next) => {
     try {
-        let userId = await '6564fb47986fd44624ae656b'
+        let userId = await req.payload
         let eventId = await req.params.eventId
         console.log(eventId);
         const saved = new Saved({
@@ -89,7 +89,7 @@ const eventSave = async(req, res, next) => {
             eventId: eventId,
         });
         saved.save()
-        res.status(200).json(saved);   
+        res.status(201).json(saved);   
     } catch (err){
         res.status(500).json('Error: '+ err.message)
         next(err)
