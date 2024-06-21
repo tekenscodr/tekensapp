@@ -17,7 +17,12 @@ const ticketSchema = new Schema({
     isScanned: { type: Boolean, default: false },
     timeScanned: { type: String,},
     initialPurchase: {type: String},
-    transferedTicket: {type: String, default:"0"},
+    transferedTicket: [
+        {
+            user: {type: String, required:true},
+            quantity: {type: String, required:true}
+        }
+    ],
     transferedFrom: {type: String, }
 }, { timestamp: true })
 

@@ -269,14 +269,15 @@ const eachTicket = async(req, res, next)=> {
     }
 }
 
-/****GET TICKETS BOUGHT BY A PARTICULAR USER********/
+/****GET PENDING TICKETS BOUGHT BY A PARTICULAR USER********/
 const unscannedTicket = async(req, res, next) =>{
-    try {
-        
-        let userId = await req.payload;  
-        let tickets = await Ticket.find({userId:userId}).where({"isScanned": false});
+    try {    
+        let userId = await req.payload; 
+        console.log(userId)
+ 
+        let tickets = await Ticket.find({userId:userId}).where({"isScanned": true});
         /** if condition*/
-        if(tickets == 0) throw("There are no tickets");
+        if(tickets == 0) res.status(200).json({"data":[]});
         
         
        const pending = await Promise.all(tickets.map(async (ticket) => {
@@ -286,8 +287,8 @@ const unscannedTicket = async(req, res, next) =>{
             ticket.event_details = event
             
             return {
-                ticket,
-                event
+                ...ticket._doc,
+                ...event
              };
             }));
 
@@ -298,30 +299,34 @@ const unscannedTicket = async(req, res, next) =>{
     }
 }
 /*******All Tickets Bought By A Particular User That Are Scanned*****/
-const scannedTicket = async(req, res, next) =>{
-    try {
-        const userId = await req.payload  
-        const tickets = await Ticket.find({userId:userId})
-        .where({"isScanned": true})
-        const scanned = await Promise.all(tickets.map(async ticket => {
-            const event = await Event.findOne({
+const attended = async(req, res, next) =>{
+    try {      
+        console.log(req.payload); // Add this line
+        let userId = await req.payload;  
+        console.log(userId)
+        let tickets = await Ticket.find({ userId: userId, isScanned: false }); 
+        if(tickets == 0) throw("There are no tickets");
+        
+        
+       const pending = await Promise.all(tickets.map(async (ticket) => {
+            let event = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
-             ticket.event_details = event
-             //let cards = await ticket.push(...events)
-             // cards = await events.push(...ticket)
-             
-              return {
-                ticket,
-                event
+            ticket.event_details = event
+            
+            return {
+                ...ticket._doc,
+                ...event
              };
-            }))
-            res.status(200).json(scanned);
+            }));
+
+            return res.status(200).json(pending);
     } catch (error) {
         res.status(500).json(error);
         next(error)
     }
 }
+
 //:TODO => check for how to update using mongoose
 const cancelTicket = async(req, res, next) => {
     try {
@@ -344,26 +349,25 @@ const cancelTicket = async(req, res, next) => {
 /*******All Tickets Canceled By A Particular User*****/
 const canceledTicket = async(req, res, next) =>{
     try {
-        
         let userId = await req.payload;  
-        let tickets = await Ticket.find({userId:userId}).where({"isCanceled": true});
+        let tickets = await Ticket.find({userId:userId}).where({"isScanned": false});
         /** if condition*/
         if(tickets == 0) throw("There are no tickets");
         
         
-       const pending = await Promise.all(tickets.map(async (ticket) => {
+       const canceled = await Promise.all(tickets.map(async (ticket) => {
             let event = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
             ticket.event_details = event
             
             return {
-                ticket,
-                event
+                ...ticket._doc,
+                ...event
              };
             }));
 
-            return res.status(200).json(pending);
+            return res.status(200).json(canceled);
     } catch (error) {
         res.status(500).json(error);
         next(error)
@@ -439,7 +443,7 @@ const buyTicket = async(req, res, next) => {
 module.exports = { 
             saveTicket, 
             unscannedTicket, 
-            scannedTicket, 
+            attended, 
             scannerTicket,
             eachTicket,
             buyTicket,
