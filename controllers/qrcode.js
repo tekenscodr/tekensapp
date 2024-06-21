@@ -275,7 +275,7 @@ const unscannedTicket = async(req, res, next) =>{
         let userId = await req.payload; 
         console.log(userId)
  
-        let tickets = await Ticket.find({userId:userId}).where({"isScanned": true});
+        let tickets = await Ticket.find({userId:userId}).where({"isScanned": false});
         /** if condition*/
         if(tickets == 0) res.status(200).json({"data":[]});
         
@@ -301,14 +301,11 @@ const unscannedTicket = async(req, res, next) =>{
 /*******All Tickets Bought By A Particular User That Are Scanned*****/
 const attended = async(req, res, next) =>{
     try {      
-        console.log(req.payload); // Add this line
+        console.log(req.payload);
         let userId = await req.payload;  
         console.log(userId)
-        let tickets = await Ticket.find({ userId: userId, isScanned: false }); 
-        if(tickets == 0) throw("There are no tickets");
-        
-        
-       const pending = await Promise.all(tickets.map(async (ticket) => {
+        let tickets = await Ticket.find({ userId: userId, isScanned: true }); 
+       const scanned = await Promise.all(tickets.map(async (ticket) => {
             let event = await Event.findOne({
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
@@ -320,7 +317,7 @@ const attended = async(req, res, next) =>{
              };
             }));
 
-            return res.status(200).json(pending);
+            return res.status(200).json(scanned);
     } catch (error) {
         res.status(500).json(error);
         next(error)
@@ -350,10 +347,7 @@ const cancelTicket = async(req, res, next) => {
 const canceledTicket = async(req, res, next) =>{
     try {
         let userId = await req.payload;  
-        let tickets = await Ticket.find({userId:userId}).where({"isScanned": false});
-        /** if condition*/
-        if(tickets == 0) throw("There are no tickets");
-        
+        let tickets = await Ticket.find({userId:userId}).where({"isCanceled": true});        
         
        const canceled = await Promise.all(tickets.map(async (ticket) => {
             let event = await Event.findOne({
