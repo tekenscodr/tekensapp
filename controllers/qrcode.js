@@ -325,36 +325,24 @@ const attended = async(req, res, next) =>{
 }
 
 //:TODO => check for how to update using mongoose
-const cancelTicket = async(req, res, next) => {
+const cancelTicket = async (req, res, next) => {
     try {
-        const ticketId = req.params 
-        const tickets = await Ticket.findByIdAndUpdate(ticketId, {
-            $set: {
-                isCanceled: true,
-            }
-        }, { new:true })
-        
-        ({_id:ticketId}).where({"isCanceled": true})
-
-      const canceled = await Promise.all(tickets.map(async (ticket) => {
-            let event = await Event.findOne({
-                _id:mongoose.Types.ObjectId(ticket.eventId)
-            }).lean()
-            ticket.event_details = event
-            
-            return {
-                ...ticket._doc,
-                ...event
-             };
-            }));
-        
-          res.status(200).json({canceled})
+      const ticketId = req.params.ticketId;
+      const ticket = await Ticket.findByIdAndUpdate(ticketId, {
+        $set: {
+          isCanceled: true,
+        },
+      }, { new: true });
+  
+      const event = await Event.findOne({ _id: ticket.eventId }).lean();
+      ticket.event_details = event;
+  
+      res.status(200).json({ ...ticket._doc, ...event });
     } catch (error) {
-        next(error)
-        res.status(500).json({'msg': error, 'status': "Failed"})
-    }c
-}
-
+      next(error);
+      res.status(500).json({ msg: error, status: "Failed" });
+    }
+  };
 /*******All Tickets Canceled By A Particular User*****/
 const canceledTicket = async(req, res, next) =>{
     try {
