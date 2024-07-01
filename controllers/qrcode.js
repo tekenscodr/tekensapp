@@ -324,21 +324,25 @@ const attended = async(req, res, next) =>{
 const cancelTicket = async (req, res, next) => {
     try {
       const ticketId = await req.params.ticketId;
-      const ticket = await Ticket.findById(ticketId)
+      const ticket = await Ticket.findOneAndUpdate(
+        { _id: ticketId },
+        { $set: { isCanceled: true } },
+        { new: true }
+      );
       if (!ticket) {
         throw new Error(`Ticket not found with ID ${ticketId}`);
       }
-      ticket.isCanceled = true
-      await ticket.save()
       const event = await Event.findOne({ _id: ticket.eventId }).lean();
       ticket.event_details = event;
-      console.log(`GOT ALL CANCELED TICKETS BY USER ${userId}`)
-      res.status(200).json({ ...ticket._doc, ...event });
+      console.log(`GOT ALL CANCELED TICKETS BY USER ${req.payload}`)
+      res.status(200).json({ticketId:ticket._doc._id, ...ticket._doc, ...event });
     } catch (error) {
       next(error);
       res.status(500).json({ msg: error, status: "Failed" });
     }
   };
+
+
 /*******All Tickets Canceled By A Particular User*****/
 const canceledTicket = async(req, res, next) =>{
     try {
