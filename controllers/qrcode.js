@@ -272,9 +272,7 @@ const eachTicket = async(req, res, next)=> {
 /****GET PENDING TICKETS BOUGHT BY A PARTICULAR USER********/
 const unscannedTicket = async(req, res, next) =>{
     try {    
-        let userId = await req.payload; 
-        console.log(userId)
- 
+        let userId = await req.payload;  
         let tickets = await Ticket.find({userId:userId}).where({"isScanned": false});
         /** if condition*/
         if(tickets == 0) res.status(200).json({"data":[]});
@@ -285,10 +283,11 @@ const unscannedTicket = async(req, res, next) =>{
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
             ticket.event_details = event
-            
+            console.log(ticket._id)
             return {
+                ticketId: ticket._doc._id,
                 ...ticket._doc,
-                ...event
+                ...ticket.event_details
              };
             }));
 
@@ -301,9 +300,7 @@ const unscannedTicket = async(req, res, next) =>{
 /*******All Tickets Bought By A Particular User That Are Scanned*****/
 const attended = async(req, res, next) =>{
     try {      
-        console.log(req.payload);
         let userId = await req.payload;  
-        console.log(userId)
         let tickets = await Ticket.find({ userId: userId, isScanned: true }); 
        const scanned = await Promise.all(tickets.map(async (ticket) => {
             let event = await Event.findOne({
@@ -312,6 +309,7 @@ const attended = async(req, res, next) =>{
             ticket.event_details = event
             
             return {
+                ticketId: ticket._doc._id,
                 ...ticket._doc,
                 ...event
              };
@@ -327,13 +325,13 @@ const attended = async(req, res, next) =>{
 //:TODO => check for how to update using mongoose
 const cancelTicket = async (req, res, next) => {
     try {
-      const ticketId = req.params.ticketId;
-      const ticket = await Ticket.findByIdAndUpdate(ticketId, {
-        $set: {
-          isCanceled: true,
-        },
-      }, { new: true });
-  
+      const ticketId = await req.params.ticketId;
+      const ticket = await Ticket.findById(ticketId)
+      if (!ticket) {
+        throw new Error(`Ticket not found with ID ${ticketId}`);
+      }
+      ticket.isCanceled = true
+      await ticket.save()
       const event = await Event.findOne({ _id: ticket.eventId }).lean();
       ticket.event_details = event;
   
@@ -356,6 +354,7 @@ const canceledTicket = async(req, res, next) =>{
             ticket.event_details = event
             
             return {
+                ticketId: ticket._doc._id,
                 ...ticket._doc,
                 ...event
              };

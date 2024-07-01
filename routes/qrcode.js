@@ -11,6 +11,6 @@ router.post('/transferTicket', verifyAccessToken, Ticket.updateTicket)
 router.post('/save/:eventId/:referenceId', verifyAccessToken, Ticket.saveTicket)
 router.get('/pay/:userId/:price', Ticket.buyTicket)
 router.get('/getTicket/:id', verifyAccessToken, Ticket.eachTicket);
-router.put('/cancel/:tickeId', verifyAccessToken, Ticket.cancelTicket)
+router.put('/cancel/:ticketId', verifyAccessToken, Ticket.cancelTicket)
 
 module.exports = router
