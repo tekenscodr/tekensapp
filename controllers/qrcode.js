@@ -283,7 +283,6 @@ const unscannedTicket = async(req, res, next) =>{
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
             ticket.event_details = event
-            console.log(ticket._id)
             return {
                 ticketId: ticket._doc._id,
                 ...ticket._doc,
