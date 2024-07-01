@@ -283,14 +283,13 @@ const unscannedTicket = async(req, res, next) =>{
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
             ticket.event_details = event
-            console.log(`GOT ALL PENDING TICKETS BY USER ${userId}`)
             return {
                 ticketId: ticket._doc._id,
                 ...ticket._doc,
                 ...ticket.event_details
              };
             }));
-
+            console.log(`GOT ALL PENDING TICKETS BY USER ${userId}`)
             return res.status(200).json(pending);
     } catch (error) {
         res.status(500).json(error);
@@ -307,14 +306,13 @@ const attended = async(req, res, next) =>{
                 _id:mongoose.Types.ObjectId(ticket.eventId)
             }).lean()
             ticket.event_details = event
-            console.log(`GOT ALL ATTENDED TICKETS BY USER ${userId}`)
             return {
                 ticketId: ticket._doc._id,
                 ...ticket._doc,
                 ...event
              };
             }));
-
+            console.log(`GOT ALL ATTENDED TICKETS BY USER ${userId}`)
             return res.status(200).json(scanned);
     } catch (error) {
         res.status(500).json(error);
@@ -359,7 +357,7 @@ const canceledTicket = async(req, res, next) =>{
                 ...event
              };
             }));
-
+            console.log(`GOT ALL CANCELED TICKETS BY USER ${userId}`)
             return res.status(200).json(canceled);
     } catch (error) {
         res.status(500).json(error);
