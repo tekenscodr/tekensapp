@@ -6,8 +6,6 @@ const purchaseSchema = new Schema({
     buyerId: {type: String, required: true},
     buyeeId: {type: String, required: false},
     referenceId: {type: String, required: true},
-    amount: {type: String, required: true},
-    
 
 },
 {timestamps:true},
