@@ -25,7 +25,8 @@ const eventSchema = new Schema({
     variation: [
         { 
             name : {type: String},
-            price : {type: String}, 
+            price : {type: String},
+            description: {type: String}, 
         },
     ],
     date: { type: Date, required: true },

@@ -52,12 +52,12 @@ const createEvent = async(req, res, next) => {
         // savedEvents.banner = imageName    
         // console.log(req.file)
         savedEvents.save().then(item => {
-            res.send('Events saved...1');
+            res.status(201).json({message: "Event saved"})
         })
 
        
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        res.status(500).json({ error: err.message })
     }
 }
 
