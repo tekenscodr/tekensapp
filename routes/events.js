@@ -4,7 +4,7 @@ const Event = require('../controllers/events')
 const upload = require('../helpers/img_upload')
 const { verifyAccessToken } = require('../helpers/jwt_helper')
 
-router.post('/create', upload.single('banner'), Event.createEvent)
+router.post('/create', Event.createEvent)
 router.get('/', Event.getEvents)
 router.get('/:eventId')
 router.get('/nearme', Event.nearMe)
