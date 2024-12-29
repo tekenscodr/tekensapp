@@ -19,22 +19,23 @@ const fetch = (...args) =>
    
     
 
-const bucketName = process.env.CODE_BUCKET_NAME
-const region= process.env.CODE_BUCKET_REGION
-const accessKey = process.env.CODE_ACCESS_KEY
-const secretAccessKey = process.env.CODE_SECRET_KEY
-const s3 = new S3Client({
-        credentials: {
-            accessKeyId: accessKey,
-            secretAccessKey: secretAccessKey,
-        },
-        region: region
-    });
+// const bucketName = process.env.CODE_BUCKET_NAME
+// const region= process.env.CODE_BUCKET_REGION
+// const accessKey = process.env.CODE_ACCESS_KEY
+// const secretAccessKey = process.env.CODE_SECRET_KEY
+// const s3 = new S3Client({
+//         credentials: {
+//             accessKeyId: accessKey,
+//             secretAccessKey: secretAccessKey,
+//         },
+//         region: region
+//     });
     
+// CREATE CODE FOR EACH TICKET
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
 // PURCHASED TICKET FOR SELF USING WEB OR APP
-const saveTicket = async (req, res, next) => {
+const purchaseWebApp = async (req, res, next) => {
     try {
       const userId = req.payload
       const eventId = req.params.eventId
@@ -42,25 +43,43 @@ const saveTicket = async (req, res, next) => {
       const verifyPayment = await fetch(`https://api.paystack.co/transaction/verify/${referenceId}`, {
         headers: { Authorization: `Bearer ${process.env.PAYSTACK_AUTH_LKEY}` }
       })
-  
+      const event = await Event.findById(eventId)
+      if (!event){
+         return res.status(500).json({"message":"Event not found"})
+      }
       if (verifyPayment.status === 200 || verifyPayment.status === 201) {
         if (req.body) {
-            const ticketVariationsArray = req.body.map((item) => ({ name: item.name, quantity: item.quantity, price: item.price }));
-            const totalQuantityBought =
-            ticketVariationsArray.reduce((total, variation) => total + parseInt(variation.quantity, 10), 0);
-          const ticket = new Ticket({
-            userId: userId,
-            eventId: eventId,
-            ticketVariations: ticketVariationsArray,
-            initialPurchase: totalQuantityBought,
-          })
-  
-          const imageName = randomImageName()
-          ticket.qrcode = imageName
-  
-          await ticket.save()
-          console.log(ticket)
-  
+            // FINDING THE CONTENT OF EACH VARIATION
+            const ticketVariationsArray = req.body.map(
+                (item) => ({ 
+                    name: item.name, 
+                    quantity: item.quantity, 
+                    price: item.price 
+                })
+            );
+           
+            // FINDING THE TOTAL AMOUNT PER VARIATION
+            const totalQuantityBought = ticketVariationsArray.reduce(
+                (total, variation) => total + parseInt(variation.quantity, 10), 0);
+          
+            //MAPPING THE REQUEST BODY TO TICKET SCHEMA 
+            const ticket = new Ticket({
+                userId: userId,
+                eventId: eventId,
+                ticketVariations: ticketVariationsArray,
+                initialPurchase: totalQuantityBought,
+            })
+            
+            // GET THE IMAGE FOR THE TICKET QR CODE   
+            const imageName = randomImageName();
+            ticket.qrcode = imageName;
+            
+            // SAVE TICKET
+            await ticket.save();
+            // console.log(ticket)
+        
+        
+         // AFTER THE TICKET IS SAVED, CREATE A SALE  
           if (ticket) {
             const purchase = new Purchase({
               ticketId: ticket._id,
@@ -68,33 +87,29 @@ const saveTicket = async (req, res, next) => {
               referenceId: referenceId
             })
             await purchase.save();
-            const event = await Event.findById(eventId)
-            if (!event){
-                res.status(500).json({"message":"Event not found"})
-            }
+           
+            
+            /**  WE RETURN THE EVENT AND TICKET DOCUMENT TO BE ABLE TO 
+             ACCESS THE FULL DATA ON THE FRONTEND*/
             const eventTicket = await {...event._doc, ...ticket._doc}
             return res.status(201).json(eventTicket)
+          } else{
+            return res.status(500).json({ "message": "Ticket not saved" })
           }
-          
         } else {
-          console.log(req.body)
-          console.log("Ticket variations is empty or not an array")
-          return res.status(500).json({ "message": "Ticket not saved" })
+          return res.status(404).json({ "message": "No data found" })
         }
       } else {
-        console.log(req.body)
-        console.log("Payment not verified!!")
-        return res.status(500).json({ "message": "Ticket not saved!!" })
+        return res.status(500).json({ "message": "Payment not verified!!" })
       }
     } catch (err) {
       next(err)
-      console.log(err)
-      return res.json(err.message)
+      return res.status(500).json({"message": `Error: ${err.message}`})
     }
   }
 
 // PURCHASE TICKET FOR ANOTHER
-const purchseForAnother = async(req, res, next) =>{
+const purchaseForAnother = async(req, res, next) =>{
     try {
         const buyerId = await req.payload
         const eventId = await req.params.id
@@ -187,7 +202,7 @@ const purchseForAnother = async(req, res, next) =>{
     }
 }
 // TICKET TRANSFER
-const updateTicket = async (req, res, next) => {
+const transferTicket = async (req, res, next) => {
     try {
         const userEmail = req.body.userId;
         const ticketId = '656a2a3c6a9a6b04e7e16beb'; // Replace with the actual ticket _id
@@ -296,6 +311,28 @@ const unscannedTicket = async(req, res, next) =>{
         next(error)
     }
 }
+// Scan Ticket
+const scanTicket = async (req, res, next) => {
+    //TODO check for how to update using mongoose
+    try {
+      const ticketId = await req.params.ticketId;
+      const ticket = await Ticket.findOneAndUpdate(
+        { _id: ticketId },
+        { $set: { isScanned: true } },
+        { new: true }
+      );
+      if (!ticket) {
+        throw new Error(`Ticket not found with ID ${ticketId}`);
+      }
+      const event = await Event.findOne({ _id: ticket.eventId }).lean();
+      ticket.event_details = event;
+      console.log(`GOT ALL CANCELED TICKETS BY USER ${req.payload}`)
+      res.status(200).json({ticketId:ticket._doc._id, ...ticket._doc, ...event });
+    } catch (error) {
+      next(error);
+      res.status(500).json({ msg: error, status: "Failed" });
+    }
+  };
 /*******All Tickets Bought By A Particular User That Are Scanned*****/
 const attended = async(req, res, next) =>{
     try {      
@@ -319,9 +356,9 @@ const attended = async(req, res, next) =>{
         next(error)
     }
 }
-
-//:TODO => check for how to update using mongoose
+// Cancel Tickets 
 const cancelTicket = async (req, res, next) => {
+    //TODO check for how to update using mongoose
     try {
       const ticketId = await req.params.ticketId;
       const ticket = await Ticket.findOneAndUpdate(
@@ -341,8 +378,6 @@ const cancelTicket = async (req, res, next) => {
       res.status(500).json({ msg: error, status: "Failed" });
     }
   };
-
-
 /*******All Tickets Canceled By A Particular User*****/
 const canceledTicket = async(req, res, next) =>{
     try {
@@ -369,9 +404,8 @@ const canceledTicket = async(req, res, next) =>{
     }
 }
 
-
-
-const scannerTicket = async(req, res, next) =>{
+// Get All Scanned Ticket
+const scannedTicket = async(req, res, next) =>{
     try {
         const eventId = await fetch
         ('http://localhost:3000/ticket/:id').then(res => res.json())
@@ -384,7 +418,7 @@ const scannerTicket = async(req, res, next) =>{
 }
 
 // PURCHASE DONE USING USSD
-const buyTicket = async(req, res, next) => {
+const ussdPurchase = async(req, res, next) => {
     try {
         let userId = await req.payload
         const result = await User.findOne({_id: userId})
@@ -428,23 +462,21 @@ const buyTicket = async(req, res, next) => {
         res.status(500).json(err)
     }
 }
-/****Why are you not running */
-// const purchase = async(req, res) => {
-//     res.send("God is good!!")
-// }
+
 
 
 
 module.exports = { 
-            saveTicket, 
+            purchaseWebApp, 
             unscannedTicket, 
             attended, 
-            scannerTicket,
+            scannedTicket,
             eachTicket,
-            buyTicket,
-            updateTicket,
+            ussdPurchase,
+            transferTicket,
+            scanTicket,
             cancelTicket,
-            purchseForAnother,
+            purchaseForAnother,
             canceledTicket
         }
 
