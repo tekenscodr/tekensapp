@@ -176,6 +176,7 @@ const getID = async(req, res, next) => {
 }
 
 
+// GET SCANNER
 const scanner = async(req, res, next) => {
     try {
         const eventId = await req.params.eventId
@@ -194,7 +195,34 @@ const scanner = async(req, res, next) => {
     }
 }
 
-// ::::TODO Search Route
+
+// ADD SCANNER
+const addScanner = async (req, res, next) => {
+    try {
+        const { eventId, scanners } = req.body;
+
+        // Find the event by ID
+        const event = await Event.findById(eventId);
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' });
+        }
+
+        // Add the new scanners to the event's scanners array
+        event.scanners.push(...scanners);
+
+        // Save the updated event
+        console.log(event)
+         await Scanners.create(event)
+
+        res.status(200).json({ message: 'Scanners added successfully', event });
+    } catch (error) {
+        res.status(500).json({ message: 'Error adding scanners', error: error.message });
+        next(error);
+    }
+};
+
+
+//TODO Search Route
 const search = async(req, res, next) => {
     try {
         
@@ -212,6 +240,7 @@ module.exports = {
         nearMe,
         scanner,
         search,
+        addScanner,
         getEventsByCategory,
     }
 
