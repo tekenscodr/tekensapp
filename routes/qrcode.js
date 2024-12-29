@@ -7,7 +7,6 @@ const {verifyAccessToken} = require('../helpers/jwt_helper')
 router.get('/attended', verifyAccessToken, Ticket.attended) 
 router.get('/pending', verifyAccessToken, Ticket.unscannedTicket)
 router.get('/canceled', verifyAccessToken, Ticket.canceledTicket)
- 
 router.get('/pay/:userId/:price', Ticket.ussdPurchase)
 router.get('/getTicket/:id', verifyAccessToken, Ticket.eachTicket);
 router.get('/scanner', Ticket.scannedTicket)

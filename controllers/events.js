@@ -7,7 +7,7 @@ const crypto = require('crypto')
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { eventNames } = require('../models/event-model');
-const Scanners = require('../models/event-model');
+const Scanners = require('../models/scanner');
 const fetch = (...args) =>
     import ('node-fetch').then(({ default: fetch }) => fetch(...args));
 
@@ -205,16 +205,21 @@ const addScanner = async (req, res, next) => {
         const event = await Event.findById(eventId);
         if (!event) {
             return res.status(404).json({ message: 'Event not found' });
+        } else {
+             // Save the updated event
+            const newScanners = scanners.map(scanner => ({
+                mobile: scanner.phoneNumber,
+                otp: scanner.otp,
+                eventId: eventId
+            }));
+
+            // Save the new scanners to the database
+            const results = await Scanners.insertMany(newScanners);
+
+            res.status(200).json({ message: 'Scanners added successfully', results });
         }
 
-        // Add the new scanners to the event's scanners array
-        event.scanners.push(...scanners);
-
-        // Save the updated event
-        console.log(event)
-         await Scanners.create(event)
-
-        res.status(200).json({ message: 'Scanners added successfully', event });
+      
     } catch (error) {
         res.status(500).json({ message: 'Error adding scanners', error: error.message });
         next(error);
