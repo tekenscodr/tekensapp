@@ -1,4 +1,5 @@
 const Organiser = require('../models/organiser');
+const Saved = require('../models/saved')
 require('dotenv');
 const { organiserRegister, loginSchema } = require('../helpers/validation_schema')
 const {
@@ -48,8 +49,35 @@ const login = async(req, res, next) => {
     }
 }
 
+const mostSavedEventsByOrganiser = async(req, res, next) => {
+    try {
+        const results = await Saved.aggregate([
+            {
+              $match: {
+                userId: '6564fb47986fd44624ae656b',
+              },
+            },
+            {
+              $group: {
+                _id: '$eventId',
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $sort: { count: -1 },
+            },
+            {
+              $limit: 10, // Get the top 10 most saved events
+            },
+          ]);
+          return res.status(200).json({message: 'Events Found', data: results})
+    } catch (error) {
+        return res.status(200).json({message: error.message})
+    }
+}
 
 module.exports = {
     register,
-    login
+    login,
+    mostSavedEventsByOrganiser,
 }

@@ -1,14 +1,18 @@
 const express = require('express')
 const router = express.Router()
-const AuthController = require('../controllers/organiser')
+const Organiser = require('../controllers/organiser')
 const { verifyAccessToken } = require('../helpers/jwt_helper')
 
 
-router.post('/register', AuthController.register);
+router.post('/register', Organiser.register);
 
-router.post('/login', AuthController.login);
+router.post('/login', Organiser.login);
 
 router.get('/veriify', verifyAccessToken)
+
+
+// Analytics
+router.get('/most-saved', Organiser.mostSavedEventsByOrganiser)
 
 
 // router.get('/:id', AuthController.userId);
