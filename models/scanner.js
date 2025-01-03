@@ -6,11 +6,27 @@ const Schema = mongoose.Schema;
 const scannersSchema = new Schema({
     scanners: [
       {
-        mobile: { type: String, required: true },
-        otp: { type: String, required: true },
+        mobile: {
+            type: String,
+            required: true 
+
+        },
+        otp: { 
+            type: String, 
+            required: true
+
+         },
       },
     ],
-    eventId: { type: String, required: true },
+    eventId: { 
+        type: String, 
+        required: true
+
+     },
+    isActive: {
+        type: Boolean,
+        default: true,
+    }
   });
 const Scanners = mongoose.model('scanner', scannersSchema)
 

@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const bcrypt = require('bcryptjs')
 const ticket =require('./qrcode-model')
+const { required } = require('joi')
 
 
 const customerSchema = new Schema({
@@ -9,6 +10,7 @@ const customerSchema = new Schema({
         type: String,
         required: true,
         lowercase: true,
+        unique: true,
     },
     phoneNumber: {
         type: String,
@@ -26,6 +28,10 @@ const customerSchema = new Schema({
         type: String,
         required: true,
     },
+    isActive: {
+        type: Boolean,
+        default: true,
+    }
     // ticket:[{ticketSchema}]
 })
 

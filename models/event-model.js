@@ -26,7 +26,7 @@ const eventSchema = new Schema({
         { 
             name : {type: String},
             price : {type: String},
-            capacity: {type: Number},
+            capacity: {type: String},
             description: {type: String}, 
         },
     ],
@@ -36,7 +36,9 @@ const eventSchema = new Schema({
     price: { type: String },
     isOnline: {default:false},
     location: GeoSchema,
-    isActive: {default:false},
+    isActive: {
+        type: Boolean,
+        default:false},
  
 }, 
 { timestamps: true }, 
