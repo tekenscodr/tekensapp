@@ -61,16 +61,26 @@ const addScanner = async (req, res, next) => {
 
 
 // GET A SCANNER 
-const getScanner = async(req, res, next) => {
-    try {
-      const eventId = await req.params.eventId;
-      const scanner = await Scanner.find({ eventId });
-      if(scanner.length <= 0) return res.status(404).json({message:"Scanners are not found"})
-        return res.status(200).json({message: "Scanners found", data: scanner})
-    } catch (error) {
-        return res.status(500).json({message: error.message})
+const getScanner = async (req, res, next) => {
+  try {
+    const eventId = req.params.eventId;
+    const scanner = await Scanner.findOne({
+      where: { eventId },
+      select: ['scanners'], // Select only the scanners field
+    });
+
+    if (!scanner) {
+      return res.status(404).json({ message: 'Scanners are not found' });
     }
-}
+
+    return res.status(200).json({ message: 'Scanners found', data: scanner.scanners });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+}; 
+
+
+
 // GET SCANNERS
 const eventScanners = async(req, res, next) => {
     try {
