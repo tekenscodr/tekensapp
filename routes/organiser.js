@@ -13,6 +13,7 @@ router.get('/veriify', verifyAccessToken)
 
 // Analytics
 router.get('/most-saved', Organiser.mostSavedEventsByOrganiser)
+router.get('/best-sales', Organiser.getBestPerformingEvents)
 
 
 // router.get('/:id', AuthController.userId);

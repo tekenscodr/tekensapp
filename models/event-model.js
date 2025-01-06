@@ -38,7 +38,7 @@ const eventSchema = new Schema({
     location: GeoSchema,
     isActive: {
         type: Boolean,
-        default:false},
+        default:true},
  
 }, 
 { timestamps: true }, 

@@ -1,5 +1,8 @@
 const Organiser = require('../models/organiser');
 const Saved = require('../models/saved')
+const Ticket = require('../models/qrcode-model')
+const Event = require('../models/event-model')   
+
 require('dotenv');
 const { organiserRegister, loginSchema } = require('../helpers/validation_schema')
 const {
@@ -76,8 +79,59 @@ const mostSavedEventsByOrganiser = async(req, res, next) => {
     }
 }
 
+const getBestPerformingEvents = async (req, res, next) => {
+    try {
+      const tickets = await Ticket.find();
+  
+      if (!tickets) {
+        return res.status(404).json({ message: 'Tickets not found' });
+      }
+  
+      const eventsSales = {};
+  
+      tickets.forEach((ticket) => {
+        const eventId = ticket.eventId;
+        const quantity = ticket.quantity;
+        const sold = ticket.sold;
+  
+        if (!eventsSales[eventId]) {
+          eventsSales[eventId] = {
+            totalQuantity: 0,
+            totalSold: 0,
+          };
+        }
+  
+        eventsSales[eventId].totalQuantity += quantity;
+        eventsSales[eventId].totalSold += sold;
+      });
+  
+      const topEvents = [];
+  
+      Object.keys(eventsSales).forEach((eventId) => {
+        const salesData = eventsSales[eventId];
+        const salesPercentage = (salesData.totalSold / salesData.totalQuantity) * 100;
+  
+        topEvents.push({ eventId, salesPercentage });
+      });
+  
+      topEvents.sort((a, b) => b.salesPercentage - a.salesPercentage);
+  
+      const topFourEvents = topEvents.slice(0, 4);
+  
+      const bestPerformingEvents = await Promise.all(topFourEvents.map(async (event) => {
+        const bestPerformingEvent = await Event.findById(event.eventId, 'title');
+        return { title: bestPerformingEvent.title, performancePercentage: event.salesPercentage };
+      }));
+  
+      return res.status(200).json({ message: 'Best performing events', data: bestPerformingEvents });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  };
+
 module.exports = {
     register,
     login,
     mostSavedEventsByOrganiser,
+    getBestPerformingEvents,
 }
