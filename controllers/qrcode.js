@@ -84,7 +84,8 @@ const purchaseWebApp = async (req, res, next) => {
             const purchase = new Purchase({
               ticketId: ticket._id,
               buyerId: userId,
-              referenceId: referenceId
+              referenceId: referenceId,
+              amount: req.body.reduce((total, item) => total + item.price * item.quantity, 0)
             })
             await purchase.save();
            
