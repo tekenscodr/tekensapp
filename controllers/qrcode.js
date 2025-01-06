@@ -12,6 +12,7 @@ const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/clien
 const {init, verify} = require('../helpers/payment')
 const https = require('https');
 const Purchase = require('../models/purchase');
+const { verifyPayment, getEvent, createPurchase, createTicket } = require('../lib/utils')
 require('dotenv')
 
 const fetch = (...args) =>
@@ -36,78 +37,45 @@ const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex'
 
 // PURCHASED TICKET FOR SELF USING WEB OR APP
 const purchaseWebApp = async (req, res, next) => {
-    try {
-      const userId = req.payload
-      const eventId = req.params.eventId
-      const referenceId = req.params.referenceId
-      const verifyPayment = await fetch(`https://api.paystack.co/transaction/verify/${referenceId}`, {
-        headers: { Authorization: `Bearer ${process.env.PAYSTACK_AUTH_LKEY}` }
-      })
-      const event = await Event.findById(eventId)
-      if (!event){
-         return res.status(500).json({"message":"Event not found"})
+  try {
+      const userId = req.payload;
+      const eventId = req.params.eventId;
+      const referenceId = req.params.referenceId;
+
+      // Verify payment
+      const paymentVerificationResult = await verifyPayment(referenceId);
+      if (!paymentVerificationResult) {
+          return res.status(500).json({ message: 'Payment not verified' });
       }
-      if (verifyPayment.status === 200 || verifyPayment.status === 201) {
-        if (req.body) {
-            // FINDING THE CONTENT OF EACH VARIATION
-            const ticketVariationsArray = req.body.map(
-                (item) => ({ 
-                    name: item.name, 
-                    quantity: item.quantity, 
-                    price: item.price 
-                })
-            );
-           
-            // FINDING THE TOTAL AMOUNT PER VARIATION
-            const totalQuantityBought = ticketVariationsArray.reduce(
-                (total, variation) => total + parseInt(variation.quantity, 10), 0);
-          
-            //MAPPING THE REQUEST BODY TO TICKET SCHEMA 
-            const ticket = new Ticket({
-                userId: userId,
-                eventId: eventId,
-                ticketVariations: ticketVariationsArray,
-                initialPurchase: totalQuantityBought,
-            })
-            
-            // GET THE IMAGE FOR THE TICKET QR CODE   
-            const imageName = randomImageName();
-            ticket.qrcode = imageName;
-            
-            // SAVE TICKET
-            await ticket.save();
-            // console.log(ticket)
-        
-        
-         // AFTER THE TICKET IS SAVED, CREATE A SALE  
-          if (ticket) {
-            const purchase = new Purchase({
-              ticketId: ticket._id,
-              buyerId: userId,
-              referenceId: referenceId,
-              amount: req.body.reduce((total, item) => total + item.price * item.quantity, 0)
-            })
-            await purchase.save();
-           
-            
-            /**  WE RETURN THE EVENT AND TICKET DOCUMENT TO BE ABLE TO 
-             ACCESS THE FULL DATA ON THE FRONTEND*/
-            const eventTicket = await {...event._doc, ...ticket._doc}
-            return res.status(201).json(eventTicket)
-          } else{
-            return res.status(500).json({ "message": "Ticket not saved" })
-          }
-        } else {
-          return res.status(404).json({ "message": "No data found" })
-        }
-      } else {
-        return res.status(500).json({ "message": "Payment not verified!!" })
+
+      // Get event
+      const event = await getEvent(eventId);
+      if (!event) {
+          return res.status(500).json({ message: 'Event not found' });
       }
-    } catch (err) {
-      next(err)
-      return res.status(500).json({"message": `Error: ${err.message}`})
-    }
+
+      // Create ticket
+      const ticket = await createTicket(req.body, userId, eventId);
+      if (!ticket) {
+          return res.status(500).json({ message: 'Ticket not created' });
+      }
+
+      // Create purchase
+      const purchase = await createPurchase(ticket._id, userId, referenceId, req.body);
+      if (!purchase) {
+          return res.status(500).json({ message: 'Purchase not created' });
+      }
+
+      // Return event and ticket
+      const eventTicket = { ...event._doc, ...ticket._doc };
+      return res.status(201).json(eventTicket);
+  } catch (err) {
+      next(err);
+      return res.status(500).json({ message: `Error: ${err.message}` });
   }
+};
+
+
 
 // PURCHASE TICKET FOR ANOTHER
 const purchaseForAnother = async(req, res, next) =>{
