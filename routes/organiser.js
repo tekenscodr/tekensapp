@@ -14,10 +14,19 @@ router.get('/veriify', verifyAccessToken)
 // Analytics
 router.get('/most-saved', Organiser.mostSavedEventsByOrganiser)
 router.get('/best-sales', Organiser.getBestPerformingEvents)
-
+router.get('/overall-sales', Organiser.overallSales)
 
 // router.get('/:id', AuthController.userId);
  
 // router.get('/getuser', AuthController.getUser);
+
+
+// TODO: Total Sales 
+
+// TODO: Total Sales per event 
+
+// TODO: Best performing Event 
+
+// TODO: Favourite Customers
 
 module.exports = router;

@@ -8,7 +8,7 @@ router.post('/create', Event.createEvent)
 router.get('/', Event.getEvents)
 router.get('/:eventId')
 router.get('/nearme', Event.nearMe)
-router.post('/saved/:eventId', verifyAccessToken, Event.eventSave)
+router.post('/save/:eventId', verifyAccessToken, Event.eventSave)
 router.get('/saved', verifyAccessToken, Event.getSavedEvents)
 
 // router.post('/scanner/login', Event.scanner)

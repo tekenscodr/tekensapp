@@ -38,6 +38,7 @@ const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex'
 // PURCHASED TICKET FOR SELF USING WEB OR APP
 const purchaseWebApp = async (req, res, next) => {
   try {
+    console.log('Purchasiung')
       const userId = req.payload;
       const eventId = req.params.eventId;
       const referenceId = req.params.referenceId;

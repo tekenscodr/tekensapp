@@ -1,15 +1,12 @@
 const Organiser = require('../models/organiser');
 const Saved = require('../models/saved')
 const Ticket = require('../models/qrcode-model')
-const Event = require('../models/event-model')   
+const Event = require('../models/event-model') 
+const Purchase = require('../models/purchase')  
 
 require('dotenv');
 const { organiserRegister, loginSchema } = require('../helpers/validation_schema')
-const {
-    signAccessToken,
-    signRefreshToken,
-    verifyAccessToken
-} = require('../helpers/jwt_helper')
+const { signAccessToken } = require('../helpers/jwt_helper')
 
 const register = async(req, res, next) =>{
     try {
@@ -51,6 +48,34 @@ const login = async(req, res, next) => {
         next(error)   
     }
 }
+
+// States the cureent total sales made by an organiser
+const overallSales = async (req, res, next) => {
+  try {
+    // Retrieve all purchases
+    const purchases = await Purchase.find();
+    
+    // Calculate the total sales
+    const totalSales = purchases.reduce((acc, purchase) => {
+      // Convert amount to number and add to accumulator
+      return acc + parseFloat(purchase.amount);
+    }, 0);
+    
+    return res.status(200).json({ totalSales });
+  } catch (error) {
+    return res.status(500).json({ message: `Error: ${error.message}` });
+  }
+};
+
+const totalSalesOfAnEvent = async(req, res, next) => {
+  try {
+    const sales = await Purchase.find({buyeeId: req.params.organiserId})
+  } catch (error) {
+    next(error)
+    return res.status(500).json({message: `Error: ${error.message}`})
+  }
+}
+
 
 const mostSavedEventsByOrganiser = async(req, res, next) => {
     try {
@@ -134,4 +159,6 @@ module.exports = {
     login,
     mostSavedEventsByOrganiser,
     getBestPerformingEvents,
+    overallSales,
+    totalSalesOfAnEvent,
 }
